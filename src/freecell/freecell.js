@@ -103,58 +103,39 @@ var freecell = (function () {
             }
         }
 
+        function move(src, card, dests, canPut) {
+            for (const dest of dests) {
+                if (!canPut(dest, card)) {
+                    continue
+                }
+                src.pop(card)
+                dest.push(card)
+                renderer.Render(game)
+                return true
+            }
+            return false
+        }
+
         function moveFromCell(src) {
-            // Move from Cell:
-            //  1. Foundation
-            //  2. Cascade
             const cell = cells[src.cell]
             const card = peek(cell)
-
+            const put = move.bind(null, cell, card)
             return put(foundations, canPutOntoFoundation) ||
                 put(cascades, canPutOntoCascade)
-
-            function put(stack, canPut) {
-                for (const dest of stack) {
-                    if (!canPut(dest, card)) {
-                        continue
-                    }
-                    cell.pop(card)
-                    dest.push(card)
-                    renderer.Render(game)
-                    return true
-                }
-                return false
-            }
         }
 
         function moveFromCascade(src) {
-            // Cascade:
-            //  1. Foundation
-            //  2. Cell
-            //  3. Another Cascade?
             const cascade = cascades[src.cascade]
             if (cascade.length - 1 !== parseInt(src.index)) {
                 // TODO: improve automatic move
-                return true
+                return false
             }
             const card = peek(cascade)
+            const put = move.bind(null, cascade, card)
 
             return put(foundations, canPutOntoFoundation) ||
                 put(cells, canPutInCell) ||
                 put(cascades.filter(dest => dest !== cascade), canPutOntoCascade)
-
-            function put(stack, canPut) {
-                for (const dest of stack) {
-                    if (!canPut(dest, card)) {
-                        continue
-                    }
-                    cascade.pop(card)
-                    dest.push(card)
-                    renderer.Render(game)
-                    return true
-                }
-                return false
-            }
         }
 
         function Move(src) {
