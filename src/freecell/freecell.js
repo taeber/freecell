@@ -73,10 +73,11 @@ var freecell = (function () {
     }
 
     function Play(renderer) {
-        const cells = [[], [], [], []]
-        const foundations = [[], [], [], []]
-        const cascades = [[], [], [], [], [], [], [], []]
-        console.log({cascades})
+        const history = []
+
+        let cells = [[], [], [], []]
+        let foundations = [[], [], [], []]
+        let cascades = [[], [], [], [], [], [], [], []]
 
         const game = {
             Cell: (i) => ({
@@ -87,10 +88,14 @@ var freecell = (function () {
             Foundations: () => foundations,
             Cascades: () => cascades,
             Move,
+            MoveCount: () => history.length - 1,
+            Over: () => cascades.every(c => c.length === 0),
             Render: renderer.Render,
+            Undo,
         }
 
         distribute()
+        snapshot()
         renderer.Render(game)
 
         return game
@@ -108,9 +113,9 @@ var freecell = (function () {
                 if (!canPut(dest, card)) {
                     continue
                 }
+                snapshot()
                 src.pop(card)
                 dest.push(card)
-                renderer.Render(game)
                 return true
             }
             return false
@@ -140,10 +145,37 @@ var freecell = (function () {
 
         function Move(src) {
             if (src.cell) {
-                return moveFromCell(src)
+                if (moveFromCell(src)) {
+                    renderer.Render(game)
+                    return true
+                }
+                return false
             } else {
-                return moveFromCascade(src)
+                if (moveFromCascade(src)) {
+                    renderer.Render(game)
+                    return true
+                }
+                return false
             }
+        }
+
+        function snapshot() {
+            history.push({
+                cells: [...cells.map(cards => [...cards])],
+                foundations: [...foundations.map(cards => [...cards])],
+                cascades: [...cascades.map(cards => [...cards])],
+            })
+        }
+
+        function Undo() {
+            if (history.length <= 1) {
+                return
+            }
+            const prev = history.pop()
+            cells = prev.cells
+            foundations = prev.foundations
+            cascades = prev.cascades
+            renderer.Render(game)
         }
     }
 

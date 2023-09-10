@@ -148,3 +148,14 @@ main {
 .card .Diamonds {
     color: red;
 }
+
+.winner {
+    font-size: xx-large;
+    color: var(--accent);
+    background-color: var(--bgcolor);
+    font-style: italic;
+    position: absolute;
+    top: 0;
+    width: 92vmax;
+    text-align: center;
+}

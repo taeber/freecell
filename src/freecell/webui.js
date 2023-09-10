@@ -86,6 +86,13 @@ var webui = (function () {
         }
     }
 
+    function renderWinner(won, moves) {
+        return won
+            ? `<div class=winner>You won in ${moves} moves!</div>`
+            : ''
+            // : `<div class=winner>You won in ${moves} moves!</div>`
+    }
+
     function renderGame(game, element) {
         const topRow = `
                 <div class=top>
@@ -98,9 +105,16 @@ var webui = (function () {
         element.innerHTML = [
             topRow,
             renderCascades(game.Cascades()),
+            renderWinner(game.Over(), game.MoveCount()),
         ]
             .flatMap(x => x)
             .join("\n")
+
+        const logo = element.querySelector(".logo")
+        logo.onclick = (e) => {
+            console.debug("logo.onclick", e)
+            game.Undo()
+        }
 
         {
             const cards = element.querySelectorAll(".cell .card")

@@ -2,7 +2,8 @@ TODO
 
 [x] Move from cell
 [x] Draw empty cascade
-[ ] Undo via clicking logo
+[x] Undo via clicking logo
+[x] Winning game animation or banner or something
 [ ] Enter = Action
 [ ] (Cmd+z | Delete) = Undo
 [ ] arrows = change focus
