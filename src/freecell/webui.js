@@ -53,10 +53,15 @@ var webui = (function () {
 
     function RenderCascades(cascades) {
         // console.debug(RenderCascades.name, {cascades})
-        return `<ol class=cascades>${cascades.map(render).join('')}</ol>`
+        return `<ol class="cascades">${cascades.map(render).join('')}</ol>
+        `
 
         function render(cascade, cascadeNum) {
             // console.debug(render.name, {cascade})
+            if (cascade.length === 0) {
+                return `<ol class="empty cascade"></ol>`
+            }
+
             return `
                 <ol class=cascade>
                     ${cascade.map(render).join('')}
@@ -75,17 +80,8 @@ var webui = (function () {
         }
     }
 
-    function Renderer(element, onNextFrame) {
-        return {
-            Render,
-        }
-
-        function Render(game) {
-            onNextFrame(() => rerender(game))
-        }
-
-        function rerender(game) {
-            const topRow = `
+    function renderGame(game, element) {
+        const topRow = `
                 <div class=top>
                     ${RenderFoundations(game.Foundations())}
                     <div class=logo>FC</div>
@@ -93,32 +89,36 @@ var webui = (function () {
                 </div>
             `
 
-            element.innerHTML = [
-                topRow,
-                RenderCascades(game.Cascades()),
-            ]
-                .flatMap(x => x)
-                .join("\n")
+        element.innerHTML = [
+            topRow,
+            RenderCascades(game.Cascades()),
+        ]
+            .flatMap(x => x)
+            .join("\n")
 
-            const cards = element.querySelectorAll(".card")
-            for (const dom of cards) {
-                // console.debug({ card, cards })
-                dom.ondblclick = (e) => {
-                    console.debug("Card dbl-clicked", e)
-                    if (!game.Move(dom.dataset)) {
-                        console.log("No move")
-                    }
+        const cards = element.querySelectorAll(".card")
+        for (const dom of cards) {
+            // console.debug({ card, cards })
+            dom.onclick = (e) => {
+                console.debug("Card dbl-clicked", e)
+                if (!game.Move(dom.dataset)) {
+                    console.log("No move")
                 }
             }
         }
     }
 
+    function Renderer(element, onNextFrame) {
+        return {
+            Render,
+        }
+
+        function Render(game) {
+            onNextFrame(() => renderGame(game, element))
+        }
+    }
+
     return {
-        // RenderCascades,
-        // RenderCell,
-        // RenderCells,
-        // RenderFoundation,
-        // RenderFoundations,
         Renderer,
     }
 

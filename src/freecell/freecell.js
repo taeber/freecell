@@ -17,11 +17,17 @@ var freecell = (function () {
         Black: "Black",
     }
 
-    const suitColors = {
-        [Suits.Diamonds]: colors.Red,
-        [Suits.Clubs]: colors.Black,
-        [Suits.Hearts]: colors.Red,
-        [Suits.Spades]: colors.Black,
+    const suitColors = (suit) => {
+        switch (Suits[suit]) {
+            case Suits.Diamonds:
+            case Suits.Hearts:
+                return colors.Red
+            case Suits.Clubs:
+            case Suits.Spades:
+                return colors.Black
+            default:
+                return null
+        }
     }
 
     /** @enum {number} */
@@ -56,9 +62,12 @@ var freecell = (function () {
     }
 
     function putOntoCascade(cascade, card) {
-        const top = peek(foundation)
+        const top = peek(cascade)
         if (top) {
-            if (suitColors[top.Suit()] === suitColors[card.Suit()]) {
+            if (suitColors(top.Suit()) === suitColors(card.Suit())) {
+                return false
+            }
+            if (top.Rank() !== card.Rank() + 1) {
                 return false
             }
         }
@@ -73,17 +82,12 @@ var freecell = (function () {
         console.log({cascades})
 
         const game = {
-            // Cell: (i) => ({
-            //     Put: (card) => putInCell(cells[i], card),
-            //     Card: () => cells[i][0],
-            // }),
-            // Cells: () => cells.map((_, i) => game.Cell(i)),
-            Cells: () => cells.map((cell) => ({ Card: () => peek(cell) })),
+            Cell: (i) => ({
+                Put: (card) => putInCell(cells[i], card),
+                Card: () => cells[i][0],
+            }),
+            Cells: () => cells.map((_, i) => game.Cell(i)),
             Foundations: () => foundations,
-            // Cascade: (i) => ({
-            //     Do: "it",
-            //     // cascades[i],
-            // }),
             Cascades: () => cascades,
             Move,
             Render: renderer.Render,

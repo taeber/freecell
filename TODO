@@ -1,7 +1,8 @@
 TODO
 
 [ ] Move from cell
+[x] Draw empty cascade
 [ ] Undo via clicking logo
 [ ] Enter = Action
-[ ] Delete = Undo
+[ ] (Cmd+z | Delete) = Undo
 [ ] arrows = change focus

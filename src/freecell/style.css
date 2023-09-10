@@ -94,6 +94,9 @@ main {
     border: 1px solid transparent;
     margin: 1px;
 }
+.cascade {
+    width: 10vmax;
+}
 
 .cell { background-color: rgba(128,255,128,0.3) }
 .foundation { background-color: rgba(128,128,128,0.3) }
