@@ -1,0 +1,147 @@
+/**********/
+/* Colors */
+/**********/
+
+html {
+    --fgcolor: black;
+    --bgcolor: white;
+    --bgcolor2: #fafafa;
+    --accent: rebeccapurple;
+}
+
+@media (prefers-color-scheme: dark) {
+    html {
+        --fgcolor: white;
+        --bgcolor: black;
+        --bgcolor2: #1f1f1f;
+        --accent: pink;
+    }
+}
+
+body {
+    color: var(--fgcolor);
+    background-color: var(--bgcolor);
+}
+
+a {
+    color: var(--fgcolor);
+    text-decoration-color: var(--accent);
+}
+
+a:focus,
+a:visited,
+a:hover {
+    color: var(--accent);
+}
+
+blockquote {
+    border-left: 1px solid var(--accent);
+    background-color: var(--bgcolor2);
+}
+
+
+/**********/
+/* Layout */
+/**********/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "IBM Plex Sans", sans-serif;
+    line-height: 1.5;
+    font-size: 16px;
+    padding: 0.5rem;
+}
+
+pre,
+code {
+    font-family: "IBM Plex Mono", monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+.top {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.cells {
+    display: flex;
+    /* border: 1px solid red; */
+}
+
+.cell,
+.logo,
+.foundation {
+    width: 10vmax;
+    height: 12vmax;
+    border: 1px solid transparent;
+    margin: 1px;
+}
+
+.cell { background-color: rgba(128,255,128,0.3) }
+.foundation { background-color: rgba(128,128,128,0.3) }
+
+.card {
+    width: 8vmax;
+    height: 10vmax;
+    margin: 1px;
+    border: 1px solid black;
+    border-radius: 1em;
+    text-align: center;
+    font-size: xx-large;
+    background-color: white;
+    cursor: grab;
+}
+
+.cascade        { margin-top:  7vmax }
+.cascade .card  { margin-top: -7vmax }
+
+.cascade .card:focus {
+    cursor: grabbing;
+    border-color: rebeccapurple;
+}
+
+.logo {
+    text-align: center;
+    color: white;
+    background-color: rebeccapurple;
+    border-radius: 50%;
+}
+
+.foundations {
+    display: flex;
+    /* border: 1px solid blue; */
+}
+
+.cascades {
+    list-style-type: none;
+    display: flex
+}
+
+.cascade {
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.card .Hearts,
+.card .Diamonds {
+    color: red;
+}
