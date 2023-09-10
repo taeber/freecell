@@ -24,34 +24,40 @@ var webui = (function () {
         `
     }
 
-    function RenderCell(cell) {
-        return !cell.Card()
-            ? `<div class="empty cell"></div>`
-            : `<div class=cell><div class=card>${renderCard(cell.Card())}</div></div>`
+    function renderCells(cells) {
+        return `<div class=cells>${cells.map(renderCell).join('')}</div>`
+
+        function renderCell(cell, index) {
+            return !cell.Card()
+                ? `<div class="empty cell"></div>`
+                : `
+                    <div class=cell>
+                        <div class=card data-cell="${index}">
+                            ${renderCard(cell.Card())}
+                        </div>
+                    </div>
+                `
+        }
     }
 
-    function RenderCells(cells) {
-        return `<div class=cells>${cells.map(RenderCell).join('')}</div>`
-    }
-
-    function RenderFoundation(cards) {
-        const top = cards.slice(-1)[0]
-        // console.debug(RenderFoundation.name, {cards, top})
-        return !top
-            ? `<div class="empty foundation"></div>`
-            : `<div class=foundation><div class=card>${renderCard(top)}</div></div>`
-    }
-
-    function RenderFoundations(foundations) {
+    function renderFoundations(foundations) {
         // console.debug(RenderFoundations.name, {foundations})
         return `
             <div class=foundations>
-                ${foundations.map(RenderFoundation).join('')}
+                ${foundations.map(renderFoundation).join('')}
             </div>
         `
+
+        function renderFoundation(cards) {
+            const top = cards.slice(-1)[0]
+            // console.debug(RenderFoundation.name, {cards, top})
+            return !top
+                ? `<div class="empty foundation"></div>`
+                : `<div class=foundation><div class=card>${renderCard(top)}</div></div>`
+        }
     }
 
-    function RenderCascades(cascades) {
+    function renderCascades(cascades) {
         // console.debug(RenderCascades.name, {cascades})
         return `<ol class="cascades">${cascades.map(render).join('')}</ol>
         `
@@ -83,29 +89,43 @@ var webui = (function () {
     function renderGame(game, element) {
         const topRow = `
                 <div class=top>
-                    ${RenderFoundations(game.Foundations())}
+                    ${renderFoundations(game.Foundations())}
                     <div class=logo>FC</div>
-                    ${RenderCells(game.Cells())}
+                    ${renderCells(game.Cells())}
                 </div>
             `
 
         element.innerHTML = [
             topRow,
-            RenderCascades(game.Cascades()),
+            renderCascades(game.Cascades()),
         ]
             .flatMap(x => x)
             .join("\n")
 
-        const cards = element.querySelectorAll(".card")
-        for (const dom of cards) {
-            // console.debug({ card, cards })
-            dom.onclick = (e) => {
-                console.debug("Card dbl-clicked", e)
-                if (!game.Move(dom.dataset)) {
-                    console.log("No move")
+        {
+            const cards = element.querySelectorAll(".cell .card")
+            for (const dom of cards) {
+                dom.onclick = (e) => {
+                    console.debug("Card dbl-clicked", e)
+                    if (!game.Move(dom.dataset)) {
+                        console.log("No move")
+                    }
                 }
             }
         }
+
+        {
+            const cards = element.querySelectorAll(".cascade .card")
+            for (const dom of cards) {
+                dom.onclick = (e) => {
+                    console.debug("Card dbl-clicked", e)
+                    if (!game.Move(dom.dataset)) {
+                        console.log("No move")
+                    }
+                }
+            }
+        }
+
     }
 
     function Renderer(element, onNextFrame) {

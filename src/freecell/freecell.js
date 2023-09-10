@@ -107,6 +107,31 @@ var freecell = (function () {
         }
 
         function Move(src) {
+            if (src.cell) {
+                // Move from Cell:
+                //  1. Foundation
+                //  2. Cascade
+                const cell = cells[src.cell]
+                const card = peek(cell)
+                for (const dest of foundations) {
+                    if (!putOntoFoundation(dest, card)) {
+                        continue
+                    }
+                    cell.pop(card)
+                    renderer.Render(game)
+                    return true
+                }
+                for (const dest of cascades) {
+                    if (!putOntoCascade(dest, card)) {
+                        continue
+                    }
+                    cell.pop(card)
+                    renderer.Render(game)
+                    return true
+                }
+
+                return
+            }
             // Cascade:
             //  1. Foundation
             //  2. Cell
