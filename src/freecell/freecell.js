@@ -40,28 +40,26 @@ var freecell = (function () {
 
     const peek = (cards) => cards.slice(-1)[0]
 
-    function putInCell(cell, card) {
+    function canPutInCell(cell) {
         if (cell.length > 0) {
             return false
         }
-        cell.push(card)
         return true
     }
 
-    function putOntoFoundation(foundation, card) {
+    function canPutOntoFoundation(foundation, card) {
         const top = peek(foundation)
         if (top) {
             if (top.Suit() !== card.Suit() || top.Rank() + 1 !== card.Rank()) {
                 return false
             }
         } else if (card.Rank() !== Ranks.Ace) {
-                return false
+            return false
         }
-        foundation.push(card)
         return true
     }
 
-    function putOntoCascade(cascade, card) {
+    function canPutOntoCascade(cascade, card) {
         const top = peek(cascade)
         if (top) {
             if (suitColors(top.Suit()) === suitColors(card.Suit())) {
@@ -71,7 +69,6 @@ var freecell = (function () {
                 return false
             }
         }
-        cascade.push(card)
         return true
     }
 
@@ -106,32 +103,35 @@ var freecell = (function () {
             }
         }
 
-        function Move(src) {
-            if (src.cell) {
-                // Move from Cell:
-                //  1. Foundation
-                //  2. Cascade
-                const cell = cells[src.cell]
-                const card = peek(cell)
-                for (const dest of foundations) {
-                    if (!putOntoFoundation(dest, card)) {
-                        continue
-                    }
-                    cell.pop(card)
-                    renderer.Render(game)
-                    return true
-                }
-                for (const dest of cascades) {
-                    if (!putOntoCascade(dest, card)) {
-                        continue
-                    }
-                    cell.pop(card)
-                    renderer.Render(game)
-                    return true
-                }
+        function moveFromCell(src) {
+            // Move from Cell:
+            //  1. Foundation
+            //  2. Cascade
+            const cell = cells[src.cell]
+            const card = peek(cell)
 
-                return
+            for (const dest of foundations) {
+                if (!canPutOntoFoundation(dest, card)) {
+                    continue
+                }
+                cell.pop(card)
+                dest.push(card)
+                renderer.Render(game)
+                return true
             }
+            for (const dest of cascades) {
+                if (!canPutOntoCascade(dest, card)) {
+                    continue
+                }
+                cell.pop(card)
+                dest.push(card)
+                renderer.Render(game)
+                return true
+            }
+            return false
+        }
+
+        function moveFromCascade(src) {
             // Cascade:
             //  1. Foundation
             //  2. Cell
@@ -143,33 +143,41 @@ var freecell = (function () {
             }
             const card = peek(cascade)
             for (const dest of foundations) {
-                if (!putOntoFoundation(dest, card)) {
+                if (!canPutOntoFoundation(dest, card)) {
                     continue
                 }
                 cascade.pop(card)
+                dest.push(card)
                 renderer.Render(game)
                 return true
             }
             for (const dest of cells) {
-                if (!putInCell(dest, card)) {
+                if (!canPutInCell(dest, card)) {
                     continue
                 }
                 cascade.pop(card)
+                dest.push(card)
                 renderer.Render(game)
                 return true
             }
-            for (const dest of cascades) {
-                if (dest === cascade) {
-                    continue
-                }
-                if (!putOntoCascade(dest, card)) {
+            for (const dest of cascades.filter(dest => dest !== cascade)) {
+                if (!canPutOntoCascade(dest, card)) {
                     continue
                 }
                 cascade.pop(card)
+                dest.push(card)
                 renderer.Render(game)
                 return true
             }
             return false
+        }
+
+        function Move(src) {
+            if (src.cell) {
+                return moveFromCell(src)
+            } else {
+                return moveFromCascade(src)
+            }
         }
     }
 
