@@ -87,11 +87,12 @@ main {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: space-evenly;
 }
 
 .cells {
     display: flex;
-    /* border: 1px solid red; */
+    justify-content: space-evenly;
 }
 
 .cell,
@@ -121,8 +122,17 @@ main {
     cursor: grab;
 }
 
-.cascade        { margin-top:  7vmax }
-.cascade .card  { margin-top: -7vmax }
+.cascade        { margin-top:  3vmax }
+.cascade .card  { margin-top: -3vmax }
+
+@media screen and (min-width: 1024px) {
+    .cascade        { margin-top:  5vmax }
+    .cascade .card  { margin-top: -5vmax }
+}
+
+@media screen and (max-height: 375px) {
+    footer { display: none }
+}
 
 .cascade .card:focus {
     cursor: grabbing;
@@ -138,16 +148,19 @@ main {
 
 .foundations {
     display: flex;
-    /* border: 1px solid blue; */
+    justify-content: space-evenly;
 }
 
 .cascades {
     list-style-type: none;
-    display: flex
+    padding-left: 0;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .cascade {
     list-style-type: none;
+    padding-left: 0;
     display: flex;
     flex-direction: column;
 }
