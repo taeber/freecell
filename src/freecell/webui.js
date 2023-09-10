@@ -116,13 +116,20 @@ var webui = (function () {
             game.Undo()
         }
 
+        element.picked = {}
+
         {
             const cards = element.querySelectorAll(".cell .card")
             for (const dom of cards) {
                 dom.onclick = (e) => {
-                    console.debug("Card dbl-clicked", e)
-                    if (!game.Move(dom.dataset)) {
-                        console.log("No move")
+                    if (e.target === element.picked.cell) {
+                        if (!game.Automove(dom.dataset)) {
+                            console.log("No move")
+                        } else {
+                            element.picked = {}
+                        }
+                    } else {
+                        element.picked = { cell: e.target }
                     }
                 }
             }
@@ -132,9 +139,29 @@ var webui = (function () {
             const cards = element.querySelectorAll(".cascade .card")
             for (const dom of cards) {
                 dom.onclick = (e) => {
-                    console.debug("Card dbl-clicked", e)
-                    if (!game.Move(dom.dataset)) {
-                        console.log("No move")
+                    if (e.target === element.picked.cascade) {
+                        if (!game.Automove(dom.dataset)) {
+                            console.log("No move")
+                        }
+                        element.picked = {}
+                    } else if (element.picked.cascade) {
+                        // Move card in another cascade to this card
+                        const src = element.picked.cascade.parentElement
+                        if (!game.Move(dom.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        element.picked = {}
+                    } else if (element.picked.cell) {
+                        // Move card in cell to this card
+                        const src = element.picked.cell.parentElement
+                        if (!game.Move(dom.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        element.picked = {}
+                    } else {
+                        element.picked = {
+                            cascade: e.target
+                        }
                     }
                 }
             }

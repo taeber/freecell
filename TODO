@@ -4,6 +4,14 @@ TODO
 [x] Draw empty cascade
 [x] Undo via clicking logo
 [x] Winning game animation or banner or something
+[ ] Bug: Automove is great, but it can lead to a scenario where a card gets stuck between an empty cascade and a cell
 [ ] Enter = Action
 [ ] (Cmd+z | Delete) = Undo
 [ ] arrows = change focus
+
+
+Fix Automove
+------------
+
+If a card was just just moved, try moving in reverse?
+ - how to detect if card was just moved

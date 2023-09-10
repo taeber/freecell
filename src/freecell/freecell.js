@@ -87,6 +87,7 @@ var freecell = (function () {
             Cells: () => cells.map((_, i) => game.Cell(i)),
             Foundations: () => foundations,
             Cascades: () => cascades,
+            Automove,
             Move,
             MoveCount: () => history.length - 1,
             Over: () => cascades.every(c => c.length === 0),
@@ -103,6 +104,7 @@ var freecell = (function () {
         function distribute() {
             const deck = Deck()
             deck.Shuffle()
+            // for (let i = 0; i < 4; i++) deck.Take()
             for (let c = 0; !deck.Empty(); c = (c + 1) % cascades.length) {
                 cascades[c].push(deck.Take())
             }
@@ -126,7 +128,8 @@ var freecell = (function () {
             const card = peek(cell)
             const put = move.bind(null, cell, card)
             return put(foundations, canPutOntoFoundation) ||
-                put(cascades, canPutOntoCascade)
+                put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
+                put(cascades.filter(c => c.length === 0), canPutOntoCascade)
         }
 
         function moveFromCascade(src) {
@@ -143,7 +146,7 @@ var freecell = (function () {
                 put(cascades.filter(dest => dest !== cascade), canPutOntoCascade)
         }
 
-        function Move(src) {
+        function Automove(src) {
             if (src.cell) {
                 if (moveFromCell(src)) {
                     renderer.Render(game)
@@ -157,6 +160,21 @@ var freecell = (function () {
                 }
                 return false
             }
+        }
+
+        function Move(dst, src) {
+            console.log(Move.name, {dst, src})
+            const cascade = cascades[src.cascade]
+            if (cascade.length - 1 !== parseInt(src.index)) {
+                // TODO: improve automatic move
+                return false
+            }
+            const card = peek(cascade)
+            if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
+                return false
+            }
+            renderer.Render(game)
+            return true
         }
 
         function snapshot() {
