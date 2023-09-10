@@ -52,8 +52,16 @@ body {
     font-family: "IBM Plex Sans", sans-serif;
     line-height: 1.5;
     font-size: 16px;
-    padding: 0.5rem;
 }
+
+header { display: none; }
+footer {
+    position: absolute;
+    bottom: 0.5em;
+    text-align: center;
+}
+main { z-index: 2 }
+footer { z-index: 1 }
 
 pre,
 code {
