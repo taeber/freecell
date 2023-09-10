@@ -144,6 +144,10 @@ main {
     color: white;
     background-color: rebeccapurple;
     border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items:center;
 }
 
 .foundations {

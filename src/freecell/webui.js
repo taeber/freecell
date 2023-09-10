@@ -97,7 +97,7 @@ var webui = (function () {
         const topRow = `
                 <div class=top>
                     ${renderFoundations(game.Foundations())}
-                    <div class=logo>FC</div>
+                    <div class=logo><span>Undo</span></div>
                     ${renderCells(game.Cells())}
                 </div>
             `
