@@ -11,13 +11,25 @@ async function handleHttp(conn: Deno.Conn) {
     js: "text/javascript",
     css: "text/css",
     html: "text/html",
-  }
+  };
 
   const httpConn = Deno.serveHttp(conn);
   for await (const requestEvent of httpConn) {
     // Use the request pathname as filepath
     const url = new URL(requestEvent.request.url);
     const filepath = decodeURIComponent(url.pathname);
+
+    if (filepath === "/") {
+      const redirectResponse = new Response("301 Moved Permanently", {
+        status: 301,
+        headers: {
+          Location: "/index.html"
+        }
+      });
+      requestEvent.respondWith(redirectResponse);
+      console.log(requestEvent.request.method, filepath, 308);
+      continue;
+    }
 
     // Try opening the file
     let file;
@@ -26,8 +38,8 @@ async function handleHttp(conn: Deno.Conn) {
     } catch {
       // If the file cannot be opened, return a "404 Not Found" response
       const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      await requestEvent.respondWith(notFoundResponse);
-      console.log(requestEvent.request.method, filepath, 404)
+      requestEvent.respondWith(notFoundResponse);
+      console.log(requestEvent.request.method, filepath, 404);
       continue;
     }
 
@@ -38,11 +50,11 @@ async function handleHttp(conn: Deno.Conn) {
     // Build and send the response
     const response = new Response(readableStream);
 
-    const ext = filepath.split(".").slice(-1)[0]
+    const ext = filepath.split(".").slice(-1)[0];
     if (mimes[ext]) {
-      response.headers.set("Content-Type", mimes[ext])
+      response.headers.set("Content-Type", mimes[ext]);
     }
-    await requestEvent.respondWith(response);
-    console.log(requestEvent.request.method, filepath, 200)
+    requestEvent.respondWith(response);
+    console.log(requestEvent.request.method, filepath, 200);
   }
 }
