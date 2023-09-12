@@ -29,7 +29,7 @@ var webui = (function () {
 
         function renderCell(cell, index) {
             return !cell.Card()
-                ? `<div class="empty cell"></div>`
+                ? `<div class="empty cell" data-cell="${index}"></div>`
                 : `
                     <div class=cell>
                         <div class=card data-cell="${index}">
@@ -65,7 +65,10 @@ var webui = (function () {
         function render(cascade, cascadeNum) {
             // console.debug(render.name, {cascade})
             if (cascade.length === 0) {
-                return `<ol class="empty cascade"></ol>`
+                return `
+                    <ol class="empty cascade" tabindex=0
+                        data-cascade="${cascadeNum}" data-index="0"></ol>
+                `
             }
 
             return `
@@ -113,7 +116,13 @@ var webui = (function () {
             if (picked && picked.cascade) {
                 picked.cascade.classList.add("picked")
             }
-            dom.picked = picked ? picked : {}
+            if (picked) {
+                dom.picked = picked
+                dom.classList.add("picked")
+            } else {
+                dom.picked = {}
+                dom.classList.remove("picked")
+            }
         }
 
         function renderGame(game) {
@@ -140,15 +149,17 @@ var webui = (function () {
             }
 
             addOnCellClicks()
+            addOnEmptyCellClicks()
             addOnCascadeClicks()
+            addOnEmptyCascadeClicks()
 
             return
 
             function addOnCellClicks() {
                 const cards = dom.querySelectorAll(".cell .card")
                 for (const node of cards) {
-                    node.onclick = (e) => {
-                        if (e.target === dom.picked.cell) {
+                    node.onclick = () => {
+                        if (node === dom.picked.cell) {
                             if (!game.Automove(node.dataset)) {
                                 console.log("No move")
                             } else {
@@ -157,6 +168,23 @@ var webui = (function () {
                         } else {
                             pick({ cell: node })
                         }
+                    }
+                }
+            }
+
+            function addOnEmptyCellClicks() {
+                const nodes = dom.querySelectorAll(".cell.empty")
+                for (const node of nodes) {
+                    node.onclick = () => {
+                        if (!dom.picked.cascade) {
+                            return
+                        }
+                        // Move card in another cascade to this cell
+                        const src = dom.picked.cascade
+                        if (!game.Move(node.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        pick()
                     }
                 }
             }
@@ -187,6 +215,22 @@ var webui = (function () {
                         } else {
                             pick({ cascade: node })
                         }
+                    }
+                }
+            }
+
+            function addOnEmptyCascadeClicks() {
+                const nodes = dom.querySelectorAll(".cascade.empty")
+                for (const node of nodes) {
+                    node.onclick = () => {
+                        if (!dom.picked) {
+                            return
+                        }
+                        const src = dom.picked.cascade ? dom.picked.cascade : dom.picked.cell
+                        if (!game.Move(node.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        pick()
                     }
                 }
             }

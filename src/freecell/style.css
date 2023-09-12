@@ -97,18 +97,27 @@ main {
 
 .cell,
 .logo,
-.foundation {
+.foundation,
+.cascade {
     width: 10vmax;
     height: 12vmax;
     border: 1px solid transparent;
     margin: 1px;
 }
-.cascade {
-    width: 10vmax;
-}
 
 .cell { background-color: rgba(128,255,128,0.3) }
 .foundation { background-color: rgba(128,128,128,0.3) }
+
+.empty.cascade {
+    border-color: rgba(128,255,128,0.3);
+    margin-top: 1px;
+}
+
+main.picked .empty.cascade,
+main.picked .empty.cell,
+main.picked .card {
+    cursor: crosshair;
+}
 
 .card {
     width: 8vmax;

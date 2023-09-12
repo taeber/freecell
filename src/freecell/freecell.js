@@ -163,6 +163,7 @@ var freecell = (function () {
         }
 
         function Move(dst, src) {
+            // TODO: refactor this mess
             console.log(Move.name, {dst, src})
             if (src.cell) {
                 const cell = cells[src.cell]
@@ -179,8 +180,14 @@ var freecell = (function () {
                     return false
                 }
                 const card = peek(cascade)
-                if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
-                    return false
+                if (dst.cell) {
+                    if (!move(cascade, card, [cells[dst.cell]], canPutInCell)) {
+                        return false
+                    }
+                } else {
+                    if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
+                        return false
+                    }
                 }
                 renderer.Render(game)
                 return true
