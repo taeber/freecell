@@ -100,9 +100,14 @@ main {
 .foundation,
 .cascade {
     width: 10vmax;
-    height: 12vmax;
     border: 1px solid transparent;
     margin: 1px;
+}
+
+.cell,
+.logo,
+.foundation {
+    height: 12vmax;
 }
 
 .cell { background-color: rgba(128,255,128,0.3) }
