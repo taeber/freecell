@@ -90,7 +90,7 @@ var freecell = (function () {
             Automove,
             Move,
             MoveCount: () => history.length - 1,
-            Over: () => cascades.every(c => c.length === 0),
+            Over: () => [...cascades, ...cells].every(c => c.length === 0),
             Render: renderer.Render,
             Undo,
         }
