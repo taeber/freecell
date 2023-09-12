@@ -93,8 +93,31 @@ var webui = (function () {
             // : `<div class=winner>You won in ${moves} moves!</div>`
     }
 
-    function renderGame(game, element) {
-        const topRow = `
+    function Renderer(dom, onNextFrame) {
+        dom.picked = {}
+
+        return {
+            Render: (game) => onNextFrame(() => renderGame(game)),
+        }
+
+        function pick(picked) {
+            if (dom.picked.cell) {
+                dom.picked.cell.classList.remove("picked")
+            }
+            if (dom.picked.cascade) {
+                dom.picked.cascade.classList.remove("picked")
+            }
+            if (picked && picked.cell) {
+                picked.cell.classList.add("picked")
+            }
+            if (picked && picked.cascade) {
+                picked.cascade.classList.add("picked")
+            }
+            dom.picked = picked ? picked : {}
+        }
+
+        function renderGame(game) {
+            const topRow = `
                 <div class=top>
                     ${renderFoundations(game.Foundations())}
                     <div class=logo><span>Undo</span></div>
@@ -102,81 +125,74 @@ var webui = (function () {
                 </div>
             `
 
-        element.innerHTML = [
-            topRow,
-            renderCascades(game.Cascades()),
-            renderWinner(game.Over(), game.MoveCount()),
-        ]
-            .flatMap(x => x)
-            .join("\n")
+            dom.innerHTML = [
+                topRow,
+                renderCascades(game.Cascades()),
+                renderWinner(game.Over(), game.MoveCount()),
+            ]
+                .flatMap(x => x)
+                .join("\n")
 
-        const logo = element.querySelector(".logo")
-        logo.onclick = (e) => {
-            console.debug("logo.onclick", e)
-            game.Undo()
-        }
+            const logo = dom.querySelector(".logo")
+            logo.onclick = (e) => {
+                console.debug("logo.onclick", e)
+                game.Undo()
+            }
 
-        element.picked = {}
+            addOnCellClicks()
+            addOnCascadeClicks()
 
-        {
-            const cards = element.querySelectorAll(".cell .card")
-            for (const dom of cards) {
-                dom.onclick = (e) => {
-                    if (e.target === element.picked.cell) {
-                        if (!game.Automove(dom.dataset)) {
-                            console.log("No move")
+            return
+
+            function addOnCellClicks() {
+                const cards = dom.querySelectorAll(".cell .card")
+                for (const node of cards) {
+                    node.onclick = (e) => {
+                        if (e.target === dom.picked.cell) {
+                            if (!game.Automove(node.dataset)) {
+                                console.log("No move")
+                            } else {
+                                pick()
+                            }
                         } else {
-                            element.picked = {}
+                            pick({ cell: node })
                         }
-                    } else {
-                        element.picked = { cell: e.target }
+                    }
+                }
+            }
+
+            function addOnCascadeClicks() {
+                const cards = dom.querySelectorAll(".cascade .card")
+                for (const node of cards) {
+                    node.onclick = () => {
+                        if (node === dom.picked.cascade) {
+                            if (!game.Automove(node.dataset)) {
+                                console.log("No move")
+                            }
+                            pick()
+                        } else if (dom.picked.cascade) {
+                            // Move card in another cascade to this card
+                            const src = dom.picked.cascade
+                            if (!game.Move(node.dataset, src.dataset)) {
+                                console.log("Invalid move")
+                            }
+                            pick()
+                        } else if (dom.picked.cell) {
+                            // Move card in cell to this card
+                            const src = dom.picked.cell
+                            if (!game.Move(node.dataset, src.dataset)) {
+                                console.log("Invalid move")
+                            }
+                            pick()
+                        } else {
+                            pick({ cascade: node })
+                        }
                     }
                 }
             }
         }
 
-        {
-            const cards = element.querySelectorAll(".cascade .card")
-            for (const dom of cards) {
-                dom.onclick = (e) => {
-                    if (e.target === element.picked.cascade) {
-                        if (!game.Automove(dom.dataset)) {
-                            console.log("No move")
-                        }
-                        element.picked = {}
-                    } else if (element.picked.cascade) {
-                        // Move card in another cascade to this card
-                        const src = element.picked.cascade.parentElement
-                        if (!game.Move(dom.dataset, src.dataset)) {
-                            console.log("Invalid move")
-                        }
-                        element.picked = {}
-                    } else if (element.picked.cell) {
-                        // Move card in cell to this card
-                        const src = element.picked.cell.parentElement
-                        if (!game.Move(dom.dataset, src.dataset)) {
-                            console.log("Invalid move")
-                        }
-                        element.picked = {}
-                    } else {
-                        element.picked = {
-                            cascade: e.target
-                        }
-                    }
-                }
-            }
-        }
 
-    }
-
-    function Renderer(element, onNextFrame) {
-        return {
-            Render,
-        }
-
-        function Render(game) {
-            onNextFrame(() => renderGame(game, element))
-        }
     }
 
     return {

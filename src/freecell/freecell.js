@@ -164,17 +164,27 @@ var freecell = (function () {
 
         function Move(dst, src) {
             console.log(Move.name, {dst, src})
-            const cascade = cascades[src.cascade]
-            if (cascade.length - 1 !== parseInt(src.index)) {
-                // TODO: improve automatic move
-                return false
+            if (src.cell) {
+                const cell = cells[src.cell]
+                const card = peek(cell)
+                if (!move(cell, card, [cascades[dst.cascade]], canPutOntoCascade)) {
+                    return false
+                }
+                renderer.Render(game)
+                return true
+            } else {
+                const cascade = cascades[src.cascade]
+                if (cascade.length - 1 !== parseInt(src.index)) {
+                    // TODO: improve automatic move
+                    return false
+                }
+                const card = peek(cascade)
+                if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
+                    return false
+                }
+                renderer.Render(game)
+                return true
             }
-            const card = peek(cascade)
-            if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
-                return false
-            }
-            renderer.Render(game)
-            return true
         }
 
         function snapshot() {

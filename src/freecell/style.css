@@ -114,8 +114,9 @@ main {
     width: 8vmax;
     height: 10vmax;
     margin: 1px;
-    border: 1px solid black;
-    border-radius: 1em;
+    border: 1px solid white;
+    border-radius: 0.8em;
+    box-shadow: 0px 3px 10px black;
     text-align: center;
     font-size: xx-large;
     background-color: white;
@@ -136,6 +137,9 @@ main {
 
 .cascade .card:focus {
     cursor: grabbing;
+}
+
+.card.picked {
     border-color: rebeccapurple;
 }
 
