@@ -9,7 +9,7 @@ TODO
 
 [x] #defect Allow move to cell and empty cascade
 
-[ ] #ux Maybe change it so "right-click" selects and left-click automoves?
+[x] #ux Maybe change it so "right-click" selects and left-click automoves?
 [ ] #ux Move "You win banner" so it's center-center and fits
 
 [ ] #mobile Improve look on smaller screens

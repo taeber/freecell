@@ -91,13 +91,13 @@ var freecell = (function () {
             Move,
             MoveCount: () => history.length - 1,
             Over: () => [...cascades, ...cells].every(c => c.length === 0),
-            Render: renderer.Render,
+            Render: () => renderer.Render(game),
             Undo,
         }
 
         distribute()
         snapshot()
-        renderer.Render(game)
+        game.Render()
 
         return game
 
@@ -149,13 +149,13 @@ var freecell = (function () {
         function Automove(src) {
             if (src.cell) {
                 if (moveFromCell(src)) {
-                    renderer.Render(game)
+                    game.Render()
                     return true
                 }
                 return false
             } else {
                 if (moveFromCascade(src)) {
-                    renderer.Render(game)
+                    game.Render()
                     return true
                 }
                 return false
@@ -171,7 +171,7 @@ var freecell = (function () {
                 if (!move(cell, card, [cascades[dst.cascade]], canPutOntoCascade)) {
                     return false
                 }
-                renderer.Render(game)
+                game.Render()
                 return true
             } else {
                 const cascade = cascades[src.cascade]
@@ -189,7 +189,7 @@ var freecell = (function () {
                         return false
                     }
                 }
-                renderer.Render(game)
+                game.Render()
                 return true
             }
         }
@@ -210,7 +210,7 @@ var freecell = (function () {
             cells = prev.cells
             foundations = prev.foundations
             cascades = prev.cascades
-            renderer.Render(game)
+            game.Render()
         }
     }
 

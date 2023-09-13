@@ -104,6 +104,7 @@ var webui = (function () {
         }
 
         function pick(picked) {
+            // console.debug(pick.name, { picked })
             if (dom.picked.cell) {
                 dom.picked.cell.classList.remove("picked")
             }
@@ -124,12 +125,16 @@ var webui = (function () {
                 dom.classList.remove("picked")
             }
         }
+        function hasPick() { return !!dom.picked.cell || !!dom.picked.cascade }
 
         function renderGame(game) {
             const topRow = `
                 <div class=top>
                     ${renderFoundations(game.Foundations())}
-                    <div class=logo><span>Undo</span></div>
+                    <div class=logo>
+                        <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
+                        <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
+                    </div>
                     ${renderCells(game.Cells())}
                 </div>
             `
@@ -142,10 +147,13 @@ var webui = (function () {
                 .flatMap(x => x)
                 .join("\n")
 
-            const logo = dom.querySelector(".logo")
-            logo.onclick = (e) => {
-                console.debug("logo.onclick", e)
-                game.Undo()
+            const undo = dom.querySelector("button.undo")
+            undo.onclick = () => { game.Undo() }
+
+            const quick = dom.querySelector("button.quick")
+            quick.onclick = () => {
+                dom.quick = !dom.quick
+                game.Render(game)
             }
 
             addOnCellClicks()
@@ -159,7 +167,7 @@ var webui = (function () {
                 const cards = dom.querySelectorAll(".cell .card")
                 for (const node of cards) {
                     node.onclick = () => {
-                        if (node === dom.picked.cell) {
+                        if (node === dom.picked.cell || dom.quick) {
                             if (!game.Automove(node.dataset)) {
                                 console.log("No move")
                             } else {
@@ -191,30 +199,41 @@ var webui = (function () {
 
             function addOnCascadeClicks() {
                 const cards = dom.querySelectorAll(".cascade .card")
+
                 for (const node of cards) {
                     node.onclick = () => {
-                        if (node === dom.picked.cascade) {
-                            if (!game.Automove(node.dataset)) {
-                                console.log("No move")
-                            }
-                            pick()
-                        } else if (dom.picked.cascade) {
-                            // Move card in another cascade to this card
-                            const src = dom.picked.cascade
-                            if (!game.Move(node.dataset, src.dataset)) {
-                                console.log("Invalid move")
-                            }
-                            pick()
-                        } else if (dom.picked.cell) {
-                            // Move card in cell to this card
-                            const src = dom.picked.cell
-                            if (!game.Move(node.dataset, src.dataset)) {
-                                console.log("Invalid move")
-                            }
-                            pick()
+                        if (dom.quick) {
+                            handle(node, hasPick() ? dom.picked : { cascade: node })
+                        } else if (hasPick()) {
+                            handle(node, dom.picked)
                         } else {
                             pick({ cascade: node })
                         }
+                    }
+                }
+
+                return
+
+                function handle(node, picked) {
+                    if (node === picked.cascade) {
+                        if (!game.Automove(node.dataset)) {
+                            console.log("No move")
+                        }
+                        pick()
+                    } else if (picked.cascade) {
+                        // Move card in another cascade to this card
+                        const src = picked.cascade
+                        if (!game.Move(node.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        pick()
+                    } else if (picked.cell) {
+                        // Move card in cell to this card
+                        const src = picked.cell
+                        if (!game.Move(node.dataset, src.dataset)) {
+                            console.log("Invalid move")
+                        }
+                        pick()
                     }
                 }
             }

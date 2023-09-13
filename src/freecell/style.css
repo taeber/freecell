@@ -154,18 +154,29 @@ main.picked .card {
 }
 
 .card.picked {
-    border-color: rebeccapurple;
+    border-color: var(--accent);
 }
 
 .logo {
     text-align: center;
-    color: white;
-    background-color: rebeccapurple;
-    border-radius: 50%;
+    color: var(--fgcolor);
+    background-color: var(--bgcolor2);
 
     display: flex;
-    justify-content: center;
-    align-items:center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.logo button {
+    -webkit-text-fill-color: rgba(0, 0, 0, 1);
+    -webkit-opacity: 1;
+}
+
+.logo button {
+    width: 100%;
+    font-size: smaller;
+    line-height: 1.5em;
 }
 
 .foundations {
