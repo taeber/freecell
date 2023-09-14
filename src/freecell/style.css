@@ -58,6 +58,8 @@ body {
 header { display: none; }
 footer {
     position: absolute;
+    width: 100%;
+    left: 0;
     bottom: 0.5em;
     text-align: center;
 }
