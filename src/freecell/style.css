@@ -207,14 +207,28 @@ main.picked .card {
 }
 
 .winner {
-    font-size: xx-large;
     color: var(--accent);
     background-color: var(--bgcolor);
-    font-style: italic;
+
     position: absolute;
     top: 0;
-    width: 92vmax;
-    text-align: center;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.winner span {
+    background: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(1px 1px 1px var(--fgcolor));
+
+    font-size: xx-large;
+    font-style: italic;
 }
 
 @media screen and (min-width: 1024px) {

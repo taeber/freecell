@@ -10,7 +10,7 @@ TODO
 [x] #defect Allow move to cell and empty cascade
 
 [x] #ux Maybe change it so "right-click" selects and left-click automoves?
-[ ] #ux Move "You win banner" so it's center-center and fits
+[x] #ux Move "You win banner" so it's center-center and fits
 
 [x] #mobile Improve look on smaller screens
 
@@ -18,3 +18,4 @@ TODO
 [ ] #keyboard (Cmd+z | Delete) = Undo
 [ ] #keyboard arrows = change focus
 
+[ ] #debt improper Suit enum use

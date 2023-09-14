@@ -92,9 +92,8 @@ var webui = (function () {
 
     function renderWinner(won, moves) {
         return won
-            ? `<div class=winner>You won in ${moves} moves!</div>`
+            ? `<div class=winner><span>You won in ${moves} moves!</span></div>`
             : ''
-            // : `<div class=winner>You won in ${moves} moves!</div>`
     }
 
     function Renderer(dom, onNextFrame) {
@@ -155,6 +154,11 @@ var webui = (function () {
                 if (confirm("Are you sure you want to start a new game?")) {
                     game.NewGame()
                 }
+            }
+
+            if (game.Over()) {
+                const winner = dom.querySelector(".winner")
+                winner.onclick = () => game.NewGame()
             }
 
             const undo = dom.querySelector("button.undo")
