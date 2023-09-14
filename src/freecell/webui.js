@@ -19,7 +19,8 @@ var webui = (function () {
         const suitText = freecell.Suits[card.Suit()]
         return `
             <span class="${card.Suit()}">
-                ${suitText}${rankText}
+                <span class=suit>${suitText}</span>
+                <span class=rank>${rankText}</span>
             </span>
         `
     }
@@ -131,7 +132,7 @@ var webui = (function () {
             const topRow = `
                 <div class=top>
                     ${renderFoundations(game.Foundations())}
-                    <div class=logo>
+                    <div class=actions>
                         <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
                         <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
                     </div>
