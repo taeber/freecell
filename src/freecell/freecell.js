@@ -90,6 +90,7 @@ var freecell = (function () {
             Automove,
             Move,
             MoveCount: () => history.length - 1,
+            NewGame: () => { Play(renderer) },
             Over: () => [...cascades, ...cells].every(c => c.length === 0),
             Render: () => renderer.Render(game),
             Undo,

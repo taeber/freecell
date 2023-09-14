@@ -12,7 +12,7 @@ TODO
 [x] #ux Maybe change it so "right-click" selects and left-click automoves?
 [ ] #ux Move "You win banner" so it's center-center and fits
 
-[ ] #mobile Improve look on smaller screens
+[x] #mobile Improve look on smaller screens
 
 [ ] #keyboard Enter = Action
 [ ] #keyboard (Cmd+z | Delete) = Undo

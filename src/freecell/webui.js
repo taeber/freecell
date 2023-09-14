@@ -133,6 +133,7 @@ var webui = (function () {
                 <div class=top>
                     ${renderFoundations(game.Foundations())}
                     <div class=actions>
+                        <button class=newgame>New</button>
                         <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
                         <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
                     </div>
@@ -147,6 +148,14 @@ var webui = (function () {
             ]
                 .flatMap(x => x)
                 .join("\n")
+
+
+            const newgame = dom.querySelector("button.newgame")
+            newgame.onclick = () => {
+                if (confirm("Are you sure you want to start a new game?")) {
+                    game.NewGame()
+                }
+            }
 
             const undo = dom.querySelector("button.undo")
             undo.onclick = () => { game.Undo() }
