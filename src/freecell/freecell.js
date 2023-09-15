@@ -134,7 +134,8 @@ var freecell = (function () {
         }
 
         function moveFromCascade(src) {
-            const cascade = cascades[src.cascade]
+            const cascadeNum = parseInt(src.cascade)
+            const cascade = cascades[cascadeNum]
             if (cascade.length - 1 !== parseInt(src.index)) {
                 // TODO: improve automatic move
                 return false
@@ -142,9 +143,15 @@ var freecell = (function () {
             const card = peek(cascade)
             const put = move.bind(null, cascade, card)
 
+            const nonEmptyCascadesToTheRight =
+                cascades.slice(cascadeNum + 1)
+                        .filter(c => c.length > 0)
+                        .filter(dest => dest !== cascade)
+
             return put(foundations, canPutOntoFoundation) ||
+                put(nonEmptyCascadesToTheRight, canPutOntoCascade) ||
                 put(cells, canPutInCell) ||
-                put(cascades.filter(dest => dest !== cascade), canPutOntoCascade)
+                put(cascades.slice(0, cascadeNum), canPutOntoCascade)
         }
 
         function Automove(src) {
