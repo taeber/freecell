@@ -162,7 +162,10 @@ var webui = (function () {
             }
 
             const undo = dom.querySelector("button.undo")
-            undo.onclick = () => { game.Undo() }
+            undo.onclick = (e) => {
+                e.preventDefault()
+                game.Undo()
+            }
 
             const quick = dom.querySelector("button.quick")
             quick.onclick = () => {
