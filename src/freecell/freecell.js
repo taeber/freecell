@@ -143,15 +143,15 @@ var freecell = (function () {
             const card = peek(cascade)
             const put = move.bind(null, cascade, card)
 
-            const nonEmptyCascadesToTheRight =
+            const cascadesToTheRight =
                 cascades.slice(cascadeNum + 1)
-                        .filter(c => c.length > 0)
                         .filter(dest => dest !== cascade)
 
             return put(foundations, canPutOntoFoundation) ||
-                put(nonEmptyCascadesToTheRight, canPutOntoCascade) ||
+                put(cascadesToTheRight.filter(c => c.length > 0), canPutOntoCascade) ||
                 put(cells, canPutInCell) ||
-                put(cascades.slice(0, cascadeNum), canPutOntoCascade)
+                put(cascades.slice(0, cascadeNum), canPutOntoCascade) ||
+                put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
         }
 
         function Automove(src) {
