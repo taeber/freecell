@@ -42,7 +42,7 @@ function renderFoundations(foundations) {
         `
 
     function renderFoundation(cards) {
-        const top = cards.slice(-1)[0]
+        const top = cards.at(-1)
         // console.debug(RenderFoundation.name, {cards, top})
         return !top
             ? `<div class="empty foundation"></div>`

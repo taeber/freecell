@@ -33,8 +33,6 @@ const Ranks = {
     King: 13,
 }
 
-const peek = (cards) => cards.slice(-1)[0]
-
 function canPutInCell(cell) {
     if (cell.length > 0) {
         return false
@@ -43,7 +41,7 @@ function canPutInCell(cell) {
 }
 
 function canPutOntoFoundation(foundation, card) {
-    const top = peek(foundation)
+    const top = foundation.at(-1)
     if (top) {
         if (top.Suit() !== card.Suit() || top.Rank() + 1 !== card.Rank()) {
             return false
@@ -55,7 +53,7 @@ function canPutOntoFoundation(foundation, card) {
 }
 
 function canPutOntoCascade(cascade, card) {
-    const top = peek(cascade)
+    const top = cascade.at(-1)
     if (top) {
         if (suitColors(top.Suit()) === suitColors(card.Suit())) {
             return false
@@ -121,7 +119,7 @@ function Play(renderer) {
 
     function moveFromCell(src) {
         const cell = cells[src.cell]
-        const card = peek(cell)
+        const card = cell.at(-1)
         const put = move.bind(null, cell, card)
         return put(foundations, canPutOntoFoundation) ||
             put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
@@ -135,7 +133,7 @@ function Play(renderer) {
             // TODO: improve automatic move
             return false
         }
-        const card = peek(cascade)
+        const card = cascade.at(-1)
         const put = move.bind(null, cascade, card)
 
         const cascadesToTheRight =
@@ -170,7 +168,7 @@ function Play(renderer) {
         console.log(Move.name, { dst, src })
         if (src.cell) {
             const cell = cells[src.cell]
-            const card = peek(cell)
+            const card = cell.at(-1)
             if (!move(cell, card, [cascades[dst.cascade]], canPutOntoCascade)) {
                 return false
             }
@@ -182,7 +180,7 @@ function Play(renderer) {
                 // TODO: improve automatic move
                 return false
             }
-            const card = peek(cascade)
+            const card = cascade.at(-1)
             if (dst.cell) {
                 if (!move(cascade, card, [cells[dst.cell]], canPutInCell)) {
                     return false
