@@ -33,11 +33,13 @@
         &copy; 2023 Taeber Rapczak &lang;taeber@rapczak.com&rang;
     </footer>
 
-    <script src="freecell.js"></script>
-    <script src="webui.js"></script>
-    <script src="main.js"></script>
-    <script>
-        main(document.querySelector("main"), window.requestAnimationFrame)
+    <script type="module">
+        import * as freecell from "./freecell.js"
+        import * as webui from "./webui.js"
+
+        const element = document.querySelector("main")
+        const renderer = webui.Renderer(element, window.requestAnimationFrame)
+        freecell.Play(renderer)
     </script>
 </body>
 </html>
