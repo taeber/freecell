@@ -113,7 +113,7 @@ function distribute(cascades) {
     return cascades
 }
 
-function move(dst, src, canPut, onMoving) {
+function checkedMove(dst, src, canPut, onMoving) {
     if (!dst || !src) {
         return false
     }
@@ -133,7 +133,7 @@ function moveFromCell(data, onMoving, src) {
 
     const cell = cells[src.cell]
     const put = (stacks, canPut) =>
-        stacks.some((dst) => move(dst, cell, canPut, onMoving))
+        stacks.some((dst) => checkedMove(dst, cell, canPut, onMoving))
 
     return put(foundations, canPutOntoFoundation) ||
         put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
@@ -151,7 +151,7 @@ function moveFromCascade(data, onMoving, src) {
     }
 
     const put = (stacks, canPut) =>
-        stacks.some((dst) => move(dst, cascade, canPut, onMoving))
+        stacks.some((dst) => checkedMove(dst, cascade, canPut, onMoving))
 
     const cascadesToTheRight =
         cascades.slice(cascadeNum + 1)
@@ -164,6 +164,53 @@ function moveFromCascade(data, onMoving, src) {
         put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
 }
 
+function automove(game, data, history, src) {
+    const onMoving = () => history.Snapshot(data)
+    if (src.cell) {
+        if (!moveFromCell(data, onMoving, src)) {
+            return false
+        }
+    } else if (src.cascade) {
+        if (!moveFromCascade(data, onMoving, src)) {
+            return false
+        }
+    } else {
+        return false
+    }
+    game.Render()
+    return true
+}
+
+function move(game, data, history, dst, src) {
+    const { cells, cascades } = data
+    const onMoving = () => history.Snapshot(data)
+    if (src.cell) {
+        const cell = cells[src.cell]
+        if (!checkedMove(cascades[dst.cascade], cell, canPutOntoCascade, onMoving)) {
+            return false
+        }
+    } else {
+        const cascade = cascades[src.cascade]
+        if (cascade.length - 1 !== parseInt(src.index)) {
+            // TODO: improve automatic move
+            return false
+        }
+        if (dst.cell) {
+            if (!checkedMove(cells[dst.cell], cascade, canPutInCell, onMoving)) {
+                return false
+            }
+        } else if (dst.cascade) {
+            if (!checkedMove(cascades[dst.cascade], cascade, canPutOntoCascade, onMoving)) {
+                return false
+            }
+        } else {
+            return false
+        }
+    }
+    game.Render()
+    return true
+}
+
 function Play(renderer) {
     const history = makeHistory()
     const data = makeGameData()
@@ -171,72 +218,17 @@ function Play(renderer) {
         Cells: () => data.cells,
         Foundations: () => data.foundations,
         Cascades: () => data.cascades,
-        Automove,
-        Move,
         MoveCount: () => history.Length() - 1,
-        NewGame: () => { Play(renderer) },
         Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
+
+        Automove: (src) => automove(game, data, history, src),
+        Move: (dst, src) => move(game, data, history, dst, src),
+        NewGame: () => Play(renderer),
         Render: () => renderer.Render(game),
-        Undo,
+        Undo: () => history.Restore(data) && game.Render(),
     }
     game.Render()
     return game
-
-    function Automove(src) {
-        const onMoving = () => history.Snapshot(data)
-        if (src.cell) {
-            if (!moveFromCell(data, onMoving, src)) {
-                return false
-            }
-        } else if (src.cascade) {
-            if (!moveFromCascade(data, onMoving, src)) {
-                return false
-            }
-        } else {
-            return false
-        }
-        game.Render()
-        return true
-    }
-
-    // Move validates moving the card from src to dst, performs the move, and
-    // then rerenders.
-    function Move(dst, src) {
-        const { cells, cascades } = data
-        const onMoving = () => history.Snapshot(data)
-        console.debug(Move.name, { dst, src })
-        if (src.cell) {
-            const cell = cells[src.cell]
-            if (!move(cascades[dst.cascade], cell, canPutOntoCascade, onMoving)) {
-                return false
-            }
-        } else {
-            const cascade = cascades[src.cascade]
-            if (cascade.length - 1 !== parseInt(src.index)) {
-                // TODO: improve automatic move
-                return false
-            }
-            if (dst.cell) {
-                if (!move(cells[dst.cell], cascade, canPutInCell, onMoving)) {
-                    return false
-                }
-            } else if (dst.cascade) {
-                if (!move(cascades[dst.cascade], cascade, canPutOntoCascade, onMoving)) {
-                    return false
-                }
-            } else {
-                return false
-            }
-        }
-        game.Render()
-        return true
-    }
-
-    function Undo() {
-        if (history.Restore(data)) {
-            game.Render()
-        }
-    }
 }
 
 const Card = function (/** @type Suits */suit, /** @type Ranks */rank) {
