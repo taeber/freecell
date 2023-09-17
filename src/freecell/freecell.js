@@ -12,7 +12,7 @@ const colors = {
     Black: "Black",
 }
 
-const suitColors = (suit) => {
+const suitColor = (suit) => {
     switch (Suits[suit]) {
         case Suits.Diamonds:
         case Suits.Hearts:
@@ -20,6 +20,19 @@ const suitColors = (suit) => {
         case Suits.Clubs:
         case Suits.Spades:
             return colors.Black
+        default:
+            return null
+    }
+}
+
+const oppositeColor = (suit) => {
+    switch (Suits[suit]) {
+        case Suits.Diamonds:
+        case Suits.Hearts:
+            return colors.Black
+        case Suits.Clubs:
+        case Suits.Spades:
+            return colors.Red
         default:
             return null
     }
@@ -55,7 +68,7 @@ function canPutOntoFoundation(foundation, card) {
 function canPutOntoCascade(cascade, card) {
     const top = cascade.at(-1)
     if (top) {
-        if (suitColors(top.Suit()) === suitColors(card.Suit())) {
+        if (suitColor(top.Suit()) === suitColor(card.Suit())) {
             return false
         }
         if (top.Rank() !== card.Rank() + 1) {
@@ -221,14 +234,93 @@ function Play(renderer) {
         MoveCount: () => history.Length() - 1,
         Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
 
-        Automove: (src) => automove(game, data, history, src),
+        Automove,
         Move: (dst, src) => move(game, data, history, dst, src),
         NewGame: () => Play(renderer),
         Render: () => renderer.Render(game),
         Undo: () => history.Restore(data) && game.Render(),
     }
+    history.Snapshot(data)
     game.Render()
     return game
+
+    function Automove(src) {
+        if (!automove(game, data, history, src)) {
+            return false
+        }
+
+        if (easywin(game, data, history)) {
+            console.debug("easywin")
+        }
+
+        return true
+    }
+}
+
+function easywin(game, data, history) {
+    // altHistory.Snapshot(data)
+    // data = {}
+    // altHistory.Restore(data)
+    // Find min
+    function step() {
+        const tops = [...data.cells, ...data.cascades]
+            .filter(s => s.length > 0)
+            .map(s => ({location: s, card: s.at(-1)}))
+            .sort((a,b) => a.card.Rank() - b.card.Rank())
+        const minRank = tops[0].card.Rank()
+        const mins = tops.filter(x => x.card.Rank() === minRank)
+        console.debug(easywin.name, {tops, mins})
+        // TODO: check to make sure there isn't a card of another color that
+        // needs the min. In other words,if there is a lower card of the
+        // opposite color still in play, don't move the min card.
+        // [r] [b] [r]
+        // (3) (2) (2) (0)   <- don't automove the r-3 because b-2 isn't on a foundation
+        const minBySuit = {
+            Diamonds: 1,
+            Clubs: 1,
+            Hearts: 1,
+            Spades: 1,
+        }
+        for (const foundation of data.foundations) {
+            const top = foundation.at(-1)
+            if (!top) {
+                continue
+            }
+            minBySuit[top.Suit()] = top.Rank()
+        }
+        const minByColor = {
+           [colors.Red]: Math.min(minBySuit.Diamonds, minBySuit.Hearts),
+           [colors.Black]: Math.min(minBySuit.Clubs, minBySuit.Spades),
+        }
+        console.debug(minByColor, minBySuit)
+
+        const onMoving = () => history.Snapshot(data)
+        for (const min of mins) {
+            const opposite = oppositeColor(min.card.Suit())
+            if (min.card.Rank() > minByColor[opposite]+1) {
+                console.debug("easywin skipped", min.card.Rank(), ">", minByColor[opposite]+1, opposite)
+                continue
+            }
+            for (const foundation of data.foundations) {
+                if (checkedMove(foundation, min.location, canPutOntoFoundation, onMoving)) {
+                    console.log("easywin move", data)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    function done() {
+        return [...data.cascades, ...data.cells].every(c => c.length === 0)
+    }
+
+    while (!done()) {
+        if (!step()) {
+            return false
+        }
+    }
+    return true
 }
 
 const Card = function (/** @type Suits */suit, /** @type Ranks */rank) {
