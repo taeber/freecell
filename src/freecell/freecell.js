@@ -65,149 +65,178 @@ function canPutOntoCascade(cascade, card) {
     return true
 }
 
-function Play(renderer) {
+function makeGameData() {
+    return {
+        cells: [[], [], [], []],
+        foundations: [[], [], [], []],
+        cascades: distribute([[], [], [], [], [], [], [], []]),
+    }
+}
+
+function makeHistory() {
     const history = []
-
-    let cells = [[], [], [], []]
-    let foundations = [[], [], [], []]
-    let cascades = [[], [], [], [], [], [], [], []]
-
-    const game = {
-        Cells: () => cells,
-        Foundations: () => foundations,
-        Cascades: () => cascades,
-        Automove,
-        Move,
-        MoveCount: () => history.length - 1,
-        NewGame: () => { Play(renderer) },
-        Over: () => [...cascades, ...cells].every(c => c.length === 0),
-        Render: () => renderer.Render(game),
-        Undo,
+    return {
+        Restore,
+        Snapshot,
+        Length: () => history.length,
     }
 
-    distribute()
-    snapshot()
-    game.Render()
-
-    return game
-
-    function distribute() {
-        const deck = Deck()
-        deck.Shuffle()
-        // for (let i = 0; i < 4; i++) deck.Take()
-        for (let c = 0; !deck.Empty(); c = (c + 1) % cascades.length) {
-            cascades[c].push(deck.Take())
+    function Restore(to) {
+        if (history.length <= 1) {
+            return false
         }
+        const prev = history.pop()
+        to.cells = prev.cells
+        to.foundations = prev.foundations
+        to.cascades = prev.cascades
+        return true
     }
 
-    function move(src, card, dests, canPut) {
-        for (const dest of dests) {
-            if (!canPut(dest, card)) {
-                continue
-            }
-            snapshot()
-            src.pop(card)
-            dest.push(card)
-            return true
-        }
+    function Snapshot(of) {
+        const copyCards = (cards) => [...cards]
+        const copyStack = (src) => [...src.map(copyCards)]
+        history.push({
+            cells: copyStack(of.cells),
+            foundations: copyStack(of.foundations),
+            cascades: copyStack(of.cascades),
+        })
+    }
+}
+
+function distribute(cascades) {
+    const deck = Deck()
+    deck.Shuffle()
+    // for (let i = 0; i < 4; i++) deck.Take()
+    for (let c = 0; !deck.Empty(); c = (c + 1) % cascades.length) {
+        cascades[c].push(deck.Take())
+    }
+    return cascades
+}
+
+// TODO: rename to move and rename move to something else.
+function doMove(dst, src, canPut, onMoving) {
+    if (!dst || !src) {
         return false
     }
 
-    function moveFromCell(src) {
-        const cell = cells[src.cell]
-        const card = cell.at(-1)
-        const put = move.bind(null, cell, card)
-        return put(foundations, canPutOntoFoundation) ||
-            put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
-            put(cascades.filter(c => c.length === 0), canPutOntoCascade)
+    const card = src.at(-1)
+    if (!canPut(dst, card)) {
+        return false
     }
 
-    function moveFromCascade(src) {
-        const cascadeNum = parseInt(src.cascade)
-        const cascade = cascades[cascadeNum]
-        if (cascade.length - 1 !== parseInt(src.index)) {
-            // TODO: improve automatic move
-            return false
-        }
-        const card = cascade.at(-1)
-        const put = move.bind(null, cascade, card)
+    onMoving()
+    dst.push(src.pop())
+    return true
+}
 
-        const cascadesToTheRight =
-            cascades.slice(cascadeNum + 1)
-                .filter(dest => dest !== cascade)
+function move(src, onMoving, dests, canPut) {
+    return dests.some((dst) => doMove(dst, src, canPut, onMoving))
+}
 
-        return put(foundations, canPutOntoFoundation) ||
-            put(cascadesToTheRight.filter(c => c.length > 0), canPutOntoCascade) ||
-            put(cells, canPutInCell) ||
-            put(cascades.slice(0, cascadeNum), canPutOntoCascade) ||
-            put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
+// TODO: idea simplify. Find dest. Snapshot. Then move.
+function moveFromCell(data, onMoving, src) {
+    const { cells, cascades, foundations } = data
+    const cell = cells[src.cell]
+    const put = move.bind(null, cell, onMoving)
+    return put(foundations, canPutOntoFoundation) ||
+        put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
+        put(cascades.filter(c => c.length === 0), canPutOntoCascade)
+}
+
+function moveFromCascade(data, onMoving, src) {
+    const { cells, cascades, foundations } = data
+    const cascadeNum = parseInt(src.cascade)
+    const cascade = cascades[cascadeNum]
+    if (cascade.length - 1 !== parseInt(src.index)) {
+        // TODO: improve automatic move
+        return false
     }
+    const put = move.bind(null, cascade, onMoving)
 
+    const cascadesToTheRight =
+        cascades.slice(cascadeNum + 1)
+            .filter(dest => dest !== cascade)
+
+    return put(foundations, canPutOntoFoundation) ||
+        put(cascadesToTheRight.filter(c => c.length > 0), canPutOntoCascade) ||
+        put(cells, canPutInCell) ||
+        put(cascades.slice(0, cascadeNum), canPutOntoCascade) ||
+        put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
+}
+
+function Play(renderer) {
+    const history = makeHistory()
+    const data = makeGameData()
+    const game = {
+        Cells: () => data.cells,
+        Foundations: () => data.foundations,
+        Cascades: () => data.cascades,
+        Automove,
+        Move,
+        MoveCount: () => history.Length() - 1,
+        NewGame: () => { Play(renderer) },
+        Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
+        Render: () => renderer.Render(game),
+        Undo,
+    }
+    game.Render()
+    return game
+
+    // Automove finds a valid destination and then calls Move.
     function Automove(src) {
+        const onMoving = () => history.Snapshot(data)
         if (src.cell) {
-            if (moveFromCell(src)) {
-                game.Render()
-                return true
-            }
-            return false
-        } else {
-            if (moveFromCascade(src)) {
-                game.Render()
-                return true
-            }
-            return false
-        }
-    }
-
-    function Move(dst, src) {
-        // TODO: refactor this mess
-        console.log(Move.name, { dst, src })
-        if (src.cell) {
-            const cell = cells[src.cell]
-            const card = cell.at(-1)
-            if (!move(cell, card, [cascades[dst.cascade]], canPutOntoCascade)) {
+            if (!moveFromCell(data, onMoving, src)) {
                 return false
             }
-            game.Render()
-            return true
+        } else if (src.cascade) {
+            if (!moveFromCascade(data, onMoving, src)) {
+                return false
+            }
+        } else {
+            return false
+        }
+        game.Render()
+        return true
+    }
+
+    // Move validates moving the card from src to dst, performs the move, and
+    // then rerenders.
+    function Move(dst, src) {
+        const { cells, cascades } = data
+        const onMoving = () => history.Snapshot(data)
+        console.debug(Move.name, { dst, src })
+        if (src.cell) {
+            const cell = cells[src.cell]
+            if (!doMove(cascades[dst.cascade], cell, canPutOntoCascade, onMoving)) {
+                return false
+            }
         } else {
             const cascade = cascades[src.cascade]
             if (cascade.length - 1 !== parseInt(src.index)) {
                 // TODO: improve automatic move
                 return false
             }
-            const card = cascade.at(-1)
             if (dst.cell) {
-                if (!move(cascade, card, [cells[dst.cell]], canPutInCell)) {
+                if (!doMove(cells[dst.cell], cascade, canPutInCell, onMoving)) {
+                    return false
+                }
+            } else if (dst.cascade) {
+                if (!doMove(cascades[dst.cascade], cascade, canPutOntoCascade, onMoving)) {
                     return false
                 }
             } else {
-                if (!move(cascade, card, [cascades[dst.cascade]], canPutOntoCascade)) {
-                    return false
-                }
+                return false
             }
-            game.Render()
-            return true
         }
-    }
-
-    function snapshot() {
-        history.push({
-            cells: [...cells.map(cards => [...cards])],
-            foundations: [...foundations.map(cards => [...cards])],
-            cascades: [...cascades.map(cards => [...cards])],
-        })
+        game.Render()
+        return true
     }
 
     function Undo() {
-        if (history.length <= 1) {
-            return
+        if (history.Restore(data)) {
+            game.Render()
         }
-        const prev = history.pop()
-        cells = prev.cells
-        foundations = prev.foundations
-        cascades = prev.cascades
-        game.Render()
     }
 }
 
