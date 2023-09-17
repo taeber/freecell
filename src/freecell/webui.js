@@ -181,6 +181,7 @@ function Renderer(dom, onNextFrame) {
                         if (!game.Automove(node.dataset)) {
                             console.log("No move")
                         } else {
+                            setTimeout(() => tryEasymove(100), 100)
                             pick()
                         }
                     } else {
@@ -207,6 +208,12 @@ function Renderer(dom, onNextFrame) {
             }
         }
 
+        function tryEasymove(delay) {
+            if (game.Easymove()) {
+                setTimeout(() => tryEasymove(delay - 10), Math.max(delay, 0))
+            }
+        }
+
         function addOnCascadeClicks() {
             const cards = dom.querySelectorAll(".cascade .card")
 
@@ -228,6 +235,8 @@ function Renderer(dom, onNextFrame) {
                 if (node === picked.cascade) {
                     if (!game.Automove(node.dataset)) {
                         console.log("No move")
+                    } else {
+                        setTimeout(() => tryEasymove(100), 100)
                     }
                     pick()
                 } else if (picked.cascade) {

@@ -21,9 +21,12 @@ TODO
 [ ] #debt improper Suit enum use
 
 
-[ ] #feature auto-complete
+[x] #feature auto-complete
 [ ] #feature detect if there are no valid moves and alert user
 [ ] #feature highlight lowest ranking cards
+
+[ ] #maybe #ux change CSS to have 4 constrained layouts: small (iPhone mini),
+    small-wide, mobile (iPad), desktop.
 
 
 ## Auto-complete
@@ -33,5 +36,3 @@ If it can move to a Foundation, move it.
 Repeat until there are no cards left.
 
 If this is detected, auto-complete the game by "disabling input".
-
-

@@ -177,7 +177,7 @@ function moveFromCascade(data, onMoving, src) {
         put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
 }
 
-function automove(game, data, history, src) {
+function automove(data, history, src) {
     const onMoving = () => history.Snapshot(data)
     if (src.cell) {
         if (!moveFromCell(data, onMoving, src)) {
@@ -190,11 +190,10 @@ function automove(game, data, history, src) {
     } else {
         return false
     }
-    game.Render()
     return true
 }
 
-function move(game, data, history, dst, src) {
+function move(data, history, dst, src) {
     const { cells, cascades } = data
     const onMoving = () => history.Snapshot(data)
     if (src.cell) {
@@ -220,8 +219,60 @@ function move(game, data, history, dst, src) {
             return false
         }
     }
-    game.Render()
     return true
+}
+
+// easymove tries to move a card. It finds the lowest ranked card amongst all
+// top cards in cascades and cells. For each card at that rank, it will try to
+// move it to a Foundation. If there is a card of the opposite color with a
+// lower rank, it will not move to the Foundation.
+function easymove(data, history) {
+    const tops = [...data.cells, ...data.cascades]
+        .filter(s => s.length > 0)
+        .map(s => ({ location: s, card: s.at(-1) }))
+        .sort((a, b) => a.card.Rank() - b.card.Rank())
+    const minRank = tops[0].card.Rank()
+    const mins = tops.filter(x => x.card.Rank() === minRank)
+    console.debug(easymove.name, { tops, mins })
+
+    const minBySuit = {
+        Diamonds: 1,
+        Clubs: 1,
+        Hearts: 1,
+        Spades: 1,
+    }
+    for (const foundation of data.foundations) {
+        const top = foundation.at(-1)
+        if (!top) {
+            continue
+        }
+        minBySuit[top.Suit()] = top.Rank()
+    }
+    const minByColor = {
+        [colors.Red]: Math.min(minBySuit.Diamonds, minBySuit.Hearts),
+        [colors.Black]: Math.min(minBySuit.Clubs, minBySuit.Spades),
+    }
+    console.debug(minByColor, minBySuit)
+
+    const onMoving = () => history.Snapshot(data)
+    for (const min of mins) {
+        // Check to see if there is a lower card of the opposite color still
+        // in play. If there is, don't move the min card.
+        // [r] [b] [r] [x]
+        // (3) (2) (2)    <- don't automove the r-3 because b-2 isn't on Fnd
+        const opposite = oppositeColor(min.card.Suit())
+        if (min.card.Rank() > minByColor[opposite] + 1) {
+            console.debug("easymove skipped", min.card.Rank(), ">", minByColor[opposite] + 1, opposite)
+            continue
+        }
+        for (const foundation of data.foundations) {
+            if (checkedMove(foundation, min.location, canPutOntoFoundation, onMoving)) {
+                console.debug("easymove move", data)
+                return true
+            }
+        }
+    }
+    return false
 }
 
 function Play(renderer) {
@@ -234,8 +285,9 @@ function Play(renderer) {
         MoveCount: () => history.Length() - 1,
         Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
 
-        Automove,
-        Move: (dst, src) => move(game, data, history, dst, src),
+        Automove: (src) => automove(data, history, src) && game.Render(),
+        Easymove: () => easymove(data, history) && game.Render(),
+        Move: (dst, src) => move(data, history, dst, src) && game.Render(),
         NewGame: () => Play(renderer),
         Render: () => renderer.Render(game),
         Undo: () => history.Restore(data) && game.Render(),
@@ -243,84 +295,6 @@ function Play(renderer) {
     history.Snapshot(data)
     game.Render()
     return game
-
-    function Automove(src) {
-        if (!automove(game, data, history, src)) {
-            return false
-        }
-
-        if (easywin(game, data, history)) {
-            console.debug("easywin")
-        }
-
-        return true
-    }
-}
-
-function easywin(game, data, history) {
-    // altHistory.Snapshot(data)
-    // data = {}
-    // altHistory.Restore(data)
-    // Find min
-    function step() {
-        const tops = [...data.cells, ...data.cascades]
-            .filter(s => s.length > 0)
-            .map(s => ({location: s, card: s.at(-1)}))
-            .sort((a,b) => a.card.Rank() - b.card.Rank())
-        const minRank = tops[0].card.Rank()
-        const mins = tops.filter(x => x.card.Rank() === minRank)
-        console.debug(easywin.name, {tops, mins})
-        // TODO: check to make sure there isn't a card of another color that
-        // needs the min. In other words,if there is a lower card of the
-        // opposite color still in play, don't move the min card.
-        // [r] [b] [r]
-        // (3) (2) (2) (0)   <- don't automove the r-3 because b-2 isn't on a foundation
-        const minBySuit = {
-            Diamonds: 1,
-            Clubs: 1,
-            Hearts: 1,
-            Spades: 1,
-        }
-        for (const foundation of data.foundations) {
-            const top = foundation.at(-1)
-            if (!top) {
-                continue
-            }
-            minBySuit[top.Suit()] = top.Rank()
-        }
-        const minByColor = {
-           [colors.Red]: Math.min(minBySuit.Diamonds, minBySuit.Hearts),
-           [colors.Black]: Math.min(minBySuit.Clubs, minBySuit.Spades),
-        }
-        console.debug(minByColor, minBySuit)
-
-        const onMoving = () => history.Snapshot(data)
-        for (const min of mins) {
-            const opposite = oppositeColor(min.card.Suit())
-            if (min.card.Rank() > minByColor[opposite]+1) {
-                console.debug("easywin skipped", min.card.Rank(), ">", minByColor[opposite]+1, opposite)
-                continue
-            }
-            for (const foundation of data.foundations) {
-                if (checkedMove(foundation, min.location, canPutOntoFoundation, onMoving)) {
-                    console.log("easywin move", data)
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    function done() {
-        return [...data.cascades, ...data.cells].every(c => c.length === 0)
-    }
-
-    while (!done()) {
-        if (!step()) {
-            return false
-        }
-    }
-    return true
 }
 
 const Card = function (/** @type Suits */suit, /** @type Ranks */rank) {
