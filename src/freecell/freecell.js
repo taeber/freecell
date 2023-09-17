@@ -113,8 +113,7 @@ function distribute(cascades) {
     return cascades
 }
 
-// TODO: rename to move and rename move to something else.
-function doMove(dst, src, canPut, onMoving) {
+function move(dst, src, canPut, onMoving) {
     if (!dst || !src) {
         return false
     }
@@ -129,15 +128,13 @@ function doMove(dst, src, canPut, onMoving) {
     return true
 }
 
-function move(src, onMoving, dests, canPut) {
-    return dests.some((dst) => doMove(dst, src, canPut, onMoving))
-}
-
-// TODO: idea simplify. Find dest. Snapshot. Then move.
 function moveFromCell(data, onMoving, src) {
     const { cells, cascades, foundations } = data
+
     const cell = cells[src.cell]
-    const put = move.bind(null, cell, onMoving)
+    const put = (stacks, canPut) =>
+        stacks.some((dst) => move(dst, cell, canPut, onMoving))
+
     return put(foundations, canPutOntoFoundation) ||
         put(cascades.filter(c => c.length > 0), canPutOntoCascade) ||
         put(cascades.filter(c => c.length === 0), canPutOntoCascade)
@@ -145,13 +142,16 @@ function moveFromCell(data, onMoving, src) {
 
 function moveFromCascade(data, onMoving, src) {
     const { cells, cascades, foundations } = data
+
     const cascadeNum = parseInt(src.cascade)
     const cascade = cascades[cascadeNum]
     if (cascade.length - 1 !== parseInt(src.index)) {
         // TODO: improve automatic move
         return false
     }
-    const put = move.bind(null, cascade, onMoving)
+
+    const put = (stacks, canPut) =>
+        stacks.some((dst) => move(dst, cascade, canPut, onMoving))
 
     const cascadesToTheRight =
         cascades.slice(cascadeNum + 1)
@@ -182,7 +182,6 @@ function Play(renderer) {
     game.Render()
     return game
 
-    // Automove finds a valid destination and then calls Move.
     function Automove(src) {
         const onMoving = () => history.Snapshot(data)
         if (src.cell) {
@@ -208,7 +207,7 @@ function Play(renderer) {
         console.debug(Move.name, { dst, src })
         if (src.cell) {
             const cell = cells[src.cell]
-            if (!doMove(cascades[dst.cascade], cell, canPutOntoCascade, onMoving)) {
+            if (!move(cascades[dst.cascade], cell, canPutOntoCascade, onMoving)) {
                 return false
             }
         } else {
@@ -218,11 +217,11 @@ function Play(renderer) {
                 return false
             }
             if (dst.cell) {
-                if (!doMove(cells[dst.cell], cascade, canPutInCell, onMoving)) {
+                if (!move(cells[dst.cell], cascade, canPutInCell, onMoving)) {
                     return false
                 }
             } else if (dst.cascade) {
-                if (!doMove(cascades[dst.cascade], cascade, canPutOntoCascade, onMoving)) {
+                if (!move(cascades[dst.cascade], cascade, canPutOntoCascade, onMoving)) {
                     return false
                 }
             } else {
