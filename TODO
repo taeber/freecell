@@ -19,3 +19,19 @@ TODO
 [ ] #keyboard arrows = change focus
 
 [ ] #debt improper Suit enum use
+
+
+[ ] #feature auto-complete
+[ ] #feature detect if there are no valid moves and alert user
+[ ] #feature highlight lowest ranking cards
+
+
+## Auto-complete
+
+Find the smallest card of all cascades and cells.
+If it can move to a Foundation, move it.
+Repeat until there are no cards left.
+
+If this is detected, auto-complete the game by "disabling input".
+
+
