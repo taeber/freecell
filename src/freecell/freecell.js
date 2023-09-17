@@ -73,11 +73,7 @@ function Play(renderer) {
     let cascades = [[], [], [], [], [], [], [], []]
 
     const game = {
-        Cell: (i) => ({
-            Put: (card) => putInCell(cells[i], card),
-            Card: () => cells[i][0],
-        }),
-        Cells: () => cells.map((_, i) => game.Cell(i)),
+        Cells: () => cells,
         Foundations: () => foundations,
         Cascades: () => cascades,
         Automove,

@@ -21,12 +21,13 @@ function renderCells(cells) {
     return `<div class=cells>${cells.map(renderCell).join('')}</div>`
 
     function renderCell(cell, index) {
-        return !cell.Card()
+        const card = cell.at(-1)
+        return !card
             ? `<div class="empty cell" data-cell="${index}"></div>`
             : `
                     <div class=cell>
                         <div class=card data-cell="${index}">
-                            ${renderCard(cell.Card())}
+                            ${renderCard(card)}
                         </div>
                     </div>
                 `
