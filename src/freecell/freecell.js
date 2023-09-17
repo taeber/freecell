@@ -1,3 +1,17 @@
+const AppInfo = {
+    Name: "FreeCell",
+    Version: "2023.09.17",
+    Link: "https://github.com/taeber/freecell/",
+    Copyright: {
+        Year: 2023,
+        By: "Taeber Rapczak",
+    },
+    License: {
+        Name: "MIT License",
+        Link: "https://raw.githubusercontent.com/taeber/freecell/main/LICENSE",
+    },
+}
+
 /** @enum {string} */
 const Suits = {
     Diamonds: '♦',
@@ -344,4 +358,5 @@ export {
     Card,
     Deck,
     Play,
+    AppInfo,
 }

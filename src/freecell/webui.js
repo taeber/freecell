@@ -93,6 +93,7 @@ function Renderer(dom, onNextFrame) {
     dom.picked = {}
 
     return {
+        ShowAppInfo: () => dom.querySelector("dialog.appinfo").showModal(),
         Render: (game) => onNextFrame(() => renderGame(game)),
     }
 
@@ -122,25 +123,42 @@ function Renderer(dom, onNextFrame) {
 
     function renderGame(game) {
         const topRow = `
-                <div class=top>
-                    ${renderFoundations(game.Foundations())}
-                    <div class=actions>
-                        <button class=newgame>New</button>
-                        <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
-                        <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
-                    </div>
-                    ${renderCells(game.Cells())}
+            <div class=top>
+                ${renderFoundations(game.Foundations())}
+                <div class=actions>
+                    <button class=newgame>New</button>
+                    <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
+                    <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
                 </div>
-            `
+                ${renderCells(game.Cells())}
+            </div>
+        `
+
+        const appinfoDialog = `
+            <dialog class=appinfo>
+                <strong>${freecell.AppInfo.Name}</strong>
+                <p id="version">Version: ${freecell.AppInfo.Version}</p>
+                <p>&copy; ${freecell.AppInfo.Copyright.Year} ${freecell.AppInfo.Copyright.By}</p>
+                <p>
+                    <a href="${freecell.AppInfo.License.Link}">
+                        ${freecell.AppInfo.License.Name}
+                    </a>
+                </p>
+                <p>
+                    <a href="${freecell.AppInfo.Link}">${freecell.AppInfo.Link}</a>
+                </p>
+                <button>Close</button>
+            </dialog>
+        `
 
         dom.innerHTML = [
             topRow,
             renderCascades(game.Cascades()),
             renderWinner(game.Over(), game.MoveCount()),
+            appinfoDialog,
         ]
             .flatMap(x => x)
             .join("\n")
-
 
         const newgame = dom.querySelector("button.newgame")
         newgame.onclick = () => {
@@ -165,6 +183,9 @@ function Renderer(dom, onNextFrame) {
             dom.quick = !dom.quick
             game.Render(game)
         }
+
+        const dialog = dom.querySelector("dialog.appinfo")
+        dialog.querySelector("button").onclick = () => dialog.close()
 
         addOnCellClicks()
         addOnEmptyCellClicks()

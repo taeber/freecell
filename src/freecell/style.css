@@ -57,14 +57,15 @@ body {
 
 header { display: none; }
 footer {
-    position: absolute;
+    position: fixed;
     width: 100%;
     left: 0;
     bottom: 0.5em;
-    text-align: center;
+    padding-right: 0.5em;
+    text-align: right;
 }
-main { z-index: 2 }
-footer { z-index: 1 }
+
+main { padding-bottom: 1em }
 
 pre,
 code {
@@ -238,12 +239,6 @@ main.picked .card {
     .cascade .card  { margin-top: -5vmax }
 }
 
-@media screen and (max-height: 375px) {
-    footer { display: none }
-}
-
-.Hearts .suit { font-size: smaller }
-
 @media screen and (max-width: 375px) {
 
     .actions {
@@ -252,6 +247,9 @@ main.picked .card {
         height: auto;
         order: 2;
         width: auto;
+    }
+    .actions button {
+        width: 20vw;
     }
 
     .card { font-size: 1em; height: 9.5vmax; }

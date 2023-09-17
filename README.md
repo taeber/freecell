@@ -3,9 +3,11 @@ FreeCell
 
 It's a FreeCell clone.
 
-https://taeber.rapczak.com/freecell/
+Play it now for free: https://taeber.rapczak.com/freecell/
 
-I wrote it during a 6.5 hour bus ride. Enjoy.
+I wrote the first working version during a 6.5 hour bus ride and it has kinda
+gotten outta hand.
+Enjoy.
 
 _Copyright © 2023 Taeber Rapczak \<taeber@rapczak.com>_.
 _License: [MIT](LICENSE)_.

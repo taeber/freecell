@@ -27,10 +27,9 @@
     <header>
         <h1>FreeCell</h1>
     </header>
-    <main>
-    </main>
+    <main></main>
     <footer>
-        &copy; 2023 Taeber Rapczak &lang;taeber@rapczak.com&rang;
+        <button id=net>&pi;</button>
     </footer>
 
     <script type="module">
@@ -40,6 +39,8 @@
         const element = document.querySelector("main")
         const renderer = webui.Renderer(element, window.requestAnimationFrame)
         freecell.Play(renderer)
+
+        document.getElementById("net").onclick = () => renderer.ShowAppInfo()
     </script>
 </body>
 </html>
