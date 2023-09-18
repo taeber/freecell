@@ -18,7 +18,8 @@ html {
     }
 }
 
-body {
+body,
+dialog {
     color: var(--fgcolor);
     background-color: var(--bgcolor);
 }
