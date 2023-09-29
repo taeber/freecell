@@ -36,11 +36,26 @@
         import * as freecell from "./freecell.js"
         import * as webui from "./webui.js"
 
+        const params = window.location.search
+            .slice("?".length)
+            .split("&")
+            .filter(s => s)
+            .map(kv => kv.split("="))
+            .reduce((params, [key, value]) => ({...params, [key]: value}), {})
+        console.debug({params})
+
         const element = document.querySelector("main")
         const renderer = webui.Renderer(element, window.requestAnimationFrame)
-        freecell.Play(renderer)
+        freecell.Play(renderer, onNewGame, params)
 
         document.getElementById("net").onclick = () => renderer.ShowAppInfo()
+
+        function onNewGame(game) {
+            if (params.game !== game.ID()) {
+                window.location.search = `?game=${game.ID()}`
+            }
+        }
+
     </script>
 </body>
 </html>

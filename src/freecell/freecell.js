@@ -92,11 +92,11 @@ function canPutOntoCascade(cascade, card) {
     return true
 }
 
-function makeGameData() {
+function makeGameData(deck) {
     return {
         cells: [[], [], [], []],
         foundations: [[], [], [], []],
-        cascades: distribute([[], [], [], [], [], [], [], []]),
+        cascades: distribute([[], [], [], [], [], [], [], []], deck),
     }
 }
 
@@ -130,10 +130,7 @@ function makeHistory() {
     }
 }
 
-function distribute(cascades) {
-    const deck = Deck()
-    deck.Shuffle()
-    // for (let i = 0; i < 4; i++) deck.Take()
+function distribute(cascades, deck) {
     for (let c = 0; !deck.Empty(); c = (c + 1) % cascades.length) {
         cascades[c].push(deck.Take())
     }
@@ -298,9 +295,24 @@ function easymove(data, history) {
     return false
 }
 
-function Play(renderer) {
+function Play(renderer, onNewGame, params) {
+    function validGameID() {
+        const requiredSize = 52
+        if (!params.game) {
+            return false
+        }
+        if (new Set(params.game.split('')).size !== requiredSize) {
+            return false
+        }
+        return true
+    }
+
+    params = params ?? {}
+
+    const deck = validGameID() ? Deck(params.game) : Deck()
+    const deckID = deck.ID()
     const history = makeHistory()
-    const data = makeGameData()
+    const data = makeGameData(deck)
     const game = {
         Cells: () => data.cells,
         Foundations: () => data.foundations,
@@ -311,12 +323,15 @@ function Play(renderer) {
         Automove: (src) => automove(data, history, src) && game.Render(),
         Easymove: () => easymove(data, history) && game.Render(),
         Move: (dst, src) => move(data, history, dst, src) && game.Render(),
-        NewGame: () => Play(renderer),
+        NewGame: () => Play(renderer, onNewGame),
         Render: () => renderer.Render(game),
         Undo: () => history.Restore(data) && game.Render(),
+
+        ID: () => deckID
     }
     history.Snapshot(data)
     game.Render()
+    setTimeout(() => onNewGame(game), 1)
     return game
 }
 
@@ -346,26 +361,68 @@ function shuffle(a) {
     return a;
 }
 
-const Deck = function () {
+const Deck = function (encodedDeck) {
     const cards = []
-    for (const suit in Suits) {
-        for (let rank = Ranks.Ace; rank <= Ranks.King; rank++) {
-            cards.push(Card(suit, rank))
+
+    if (encodedDeck === undefined) {
+        for (const suit in Suits) {
+            for (let rank = Ranks.Ace; rank <= Ranks.King; rank++) {
+                cards.push(Card(suit, rank))
+            }
+        }
+        shuffle(cards)
+    } else {
+        for (const letter of encodedDeck) {
+            const card = decode(letter)
+            if (!card) {
+                console.error("Invalid Deck encoding", letter, encodedDeck)
+                return Deck()
+            }
+            cards.push(card)
         }
     }
 
     return {
+        ID: () => cards.map(encode).join(''),
         Shuffle: () => shuffle(cards),
         Take: () => cards.shift(),
         Empty: () => cards.length === 0,
     }
 }
 
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+const suitNames = Object.keys(Suits)
+const numCardsInSuit = Ranks.King
+
+function decode(letter) {
+    const pos = alphabet.indexOf(letter)
+    if (pos === -1) {
+        return null
+    }
+    const
+        suit = suitNames[Math.floor(pos / numCardsInSuit)],
+        rank = (pos % numCardsInSuit) + 1
+    return Card(suit, rank)
+}
+
+function encode(card) {
+    const suitNumber = suitNames.indexOf(card.Suit())
+    const rankOffset = card.Rank() - 1
+    const pos = suitNumber * numCardsInSuit + rankOffset
+    return alphabet[pos]
+}
+
+const RandomDeck = () => Deck()
+const OrderedDeck = () => Deck(alphabet)
+
 export {
     Suits,
     Ranks,
     Card,
-    Deck,
     Play,
     AppInfo,
+
+    Deck,
+    RandomDeck,
+    OrderedDeck,
 }
