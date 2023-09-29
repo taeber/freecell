@@ -28,6 +28,8 @@ TODO
 [ ] #maybe #ux change CSS to have 4 constrained layouts: small (iPhone mini),
     small-wide, mobile (iPad), desktop.
 
+[x] #improve Automoving a King from atop another card will check for empty cascades before cells
+
 
 ## Auto-complete
 

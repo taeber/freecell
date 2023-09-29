@@ -180,15 +180,24 @@ function moveFromCascade(data, onMoving, src) {
     const put = (stacks, canPut) =>
         stacks.some((dst) => checkedMove(dst, cascade, canPut, onMoving))
 
-    const cascadesToTheRight =
-        cascades.slice(cascadeNum + 1)
-            .filter(dest => dest !== cascade)
+    const
+        leftCascades = cascades.slice(0, cascadeNum),
+        rightCascades = cascades.slice(cascadeNum + 1)
+
+    const top = cascade.at(-1).Rank()
+    if (top === Ranks.King && cascade.length > 1) {
+        if (put(foundations, canPutOntoFoundation) ||
+            put(rightCascades.filter(c => c.length === 0), canPutOntoCascade) ||
+            put(leftCascades.filter(c => c.length === 0), canPutOntoCascade)) {
+            return true
+        }
+    }
 
     return put(foundations, canPutOntoFoundation) ||
-        put(cascadesToTheRight.filter(c => c.length > 0), canPutOntoCascade) ||
+        put(rightCascades.filter(c => c.length > 0), canPutOntoCascade) ||
         put(cells, canPutInCell) ||
-        put(cascades.slice(0, cascadeNum), canPutOntoCascade) ||
-        put(cascadesToTheRight.filter(c => c.length === 0), canPutOntoCascade)
+        put(leftCascades, canPutOntoCascade) ||
+        put(rightCascades.filter(c => c.length === 0), canPutOntoCascade)
 }
 
 function automove(data, history, src) {
