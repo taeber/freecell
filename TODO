@@ -24,10 +24,27 @@ TODO
 [x] #feature auto-complete
 [ ] #feature detect if there are no valid moves and alert user
 [ ] #feature highlight lowest ranking cards
+[ ] #feature result sharing
+    * use base-52 ?game=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ)
+    * navigator.share()
+[ ] #feature results (localStorage) history (shows game ID, win/lose, moves, date/time?)
+[ ] #feature timed games - how to handle "pause" when attention goes off tab
 
 [ ] #maybe #ux change CSS to have 4 constrained layouts: small (iPhone mini),
     small-wide, mobile (iPad), desktop.
 
+[ ] #prefs Allow for different "Standards" or custom letters (AKQJ), custom colors 4-color
+[ ] #prefs ux swap foundations and cells
+[ ] #prefs ux adjustable font sizes?
+[ ] #prefs themes
+
+[ ] #ux make foundations targets
+[ ] #ux add transparent A's on Foundations
+[ ] #ux actions/options bar at the bottom (easy to tap than up top)
+[ ] #feature timed games
+[ ] #feature show move count and time
+[ ] #ux rules/tutorial
+[ ] #ux About
 [x] #improve Automoving a King from atop another card will check for empty cascades before cells
 
 
