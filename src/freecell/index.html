@@ -29,6 +29,12 @@
     </header>
     <main></main>
     <footer>
+        <div id="copied" hidden>Copied!</div>
+        <button id=share aria-label="Share" title="Share">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+            </svg>
+        </button>
         <button id=net>&pi;</button>
     </footer>
 
@@ -46,16 +52,42 @@
 
         const element = document.querySelector("main")
         const renderer = webui.Renderer(element, window.requestAnimationFrame)
-        freecell.Play(renderer, onNewGame, params)
 
         document.getElementById("net").onclick = () => renderer.ShowAppInfo()
 
-        function onNewGame(game) {
+        let game
+        function onNewGame(newGame) {
+            game = newGame
             if (params.game !== game.ID()) {
                 window.location.search = `?game=${game.ID()}`
             }
         }
 
+        const share = document.querySelector("button#share")
+        if (!navigator.share && !navigator.clipboard) {
+            share.hidden = true
+        }
+
+        share.addEventListener("click", () => {
+            try {
+                const title = `FreeCell - ${game.ID().slice(0,6)}...`
+                const text = game.Over()
+                    ? `I beat FreeCell in ${game.MoveCount()} moves! Can you do better?!`
+                    : "I'm playing FreeCell. Think you can beat my score?"
+
+                navigator.share({
+                    title,
+                    text,
+                    url: window.location.href,
+                })
+            } catch (e) {
+                console.debug(e)
+                navigator.clipboard.writeText(window.location.href)
+                alert("Link copied!")
+            }
+        })
+
+        freecell.Play(renderer, onNewGame, params)
     </script>
 </body>
 </html>
