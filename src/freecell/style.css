@@ -56,6 +56,11 @@ body {
     font-size: 16px;
 }
 
+.card {
+    font-family: 'Zen Antique', sans-serif;
+    font-weight: 400;
+}
+
 header { display: none; }
 footer {
     position: fixed;
@@ -240,7 +245,7 @@ main.picked .card {
     .cascade .card  { margin-top: -5vmax }
 }
 
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 575px) {
 
     .actions {
         flex-direction: row;
