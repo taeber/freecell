@@ -161,6 +161,7 @@ main.picked .card {
 
 .card.picked {
     border-color: var(--accent);
+    box-shadow: 0 0px 16px var(--accent);
 }
 
 .actions {
