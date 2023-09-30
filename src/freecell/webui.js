@@ -245,6 +245,8 @@ function Renderer(dom, onNextFrame) {
                         handle(node, hasPick() ? dom.picked : { cascade: node })
                     } else if (hasPick()) {
                         handle(node, dom.picked)
+                    } else if (node.nextElementSibling) {
+                        pick()
                     } else {
                         pick({ cascade: node })
                     }
