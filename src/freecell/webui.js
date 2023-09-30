@@ -176,6 +176,7 @@ function Renderer(dom, onNextFrame) {
         undo.onclick = (e) => {
             e.preventDefault()
             game.Undo()
+            pick()
         }
 
         const quick = dom.querySelector("button.quick")

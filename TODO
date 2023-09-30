@@ -14,7 +14,7 @@ TODO
 
 [x] #mobile Improve look on smaller screens
 
-[ ] #bug Pick + Undo sometimes causes inability to pick or move card
+[x] #bug Pick + Undo sometimes causes inability to pick or move card
 
 [ ] #keyboard Enter = Action
 [ ] #keyboard (Cmd+z | Delete) = Undo
