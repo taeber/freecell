@@ -56,12 +56,6 @@ body {
     font-size: 16px;
 }
 
-.empty.foundation::before,
-.card {
-    font-family: 'Zen Antique', sans-serif;
-    font-weight: 400;
-}
-
 header { display: none; }
 footer {
     position: fixed;
