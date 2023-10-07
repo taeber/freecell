@@ -41,7 +41,7 @@ TODO
 [ ] #prefs themes
 
 [ ] #ux make foundations targets
-[ ] #ux add transparent A's on Foundations
+[x] #ux add transparent A's on Foundations
 [ ] #ux actions/options bar at the bottom (easy to tap than up top)
 [ ] #feature timed games
 [ ] #feature show move count and time
