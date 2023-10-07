@@ -127,7 +127,7 @@ function Renderer(dom, onNextFrame) {
             <div class=top>
                 ${renderFoundations(game.Foundations())}
                 <div class=actions>
-                    <button class=newgame>New</button>
+                    <button class=game>Game</button>
                     <button class=quick>${dom.quick ? "Auto" : "Pick"}</button>
                     <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
                 </div>
@@ -152,21 +152,32 @@ function Renderer(dom, onNextFrame) {
             </dialog>
         `
 
+        const gameDialog = `
+            <dialog class=game>
+                <button class=new>New Game</button>
+                <button class=retry>Retry</button>
+                <button class=close>Close</button>
+            </dialog>
+        `
+
         dom.innerHTML = [
             topRow,
             renderCascades(game.Cascades()),
             renderWinner(game.Over(), game.MoveCount()),
             appinfoDialog,
+            gameDialog,
         ]
             .flatMap(x => x)
             .join("\n")
 
-        const newgame = dom.querySelector("button.newgame")
-        newgame.onclick = () => {
-            if (confirm("Are you sure you want to start a new game?")) {
-                game.NewGame()
-            }
+        dom.querySelector("button.game").onclick = () => {
+            const dialog = dom.querySelector("dialog.game")
+            dialog.showModal()
+            dialog.querySelector("button.new").onclick   = () => game.NewGame()
+            dialog.querySelector("button.retry").onclick = () => window.location.reload()
+            dialog.querySelector("button.close").onclick = () => dialog.close()
         }
+
 
         if (game.Over()) {
             const winner = dom.querySelector(".winner")

@@ -242,6 +242,16 @@ main.picked .card {
     font-style: italic;
 }
 
+dialog.game button {
+    display: block;
+    margin: 1em auto;
+    width: 100%;
+}
+
+dialog.game button.close {
+    margin-top: 2em;
+}
+
 @media screen and (min-width: 1024px) {
     .cascade        { margin-top:  5vmax }
     .cascade .card  { margin-top: -5vmax }
