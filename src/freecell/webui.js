@@ -90,6 +90,7 @@ function renderWinner(won, moves) {
 }
 
 function Renderer(dom, onNextFrame) {
+    dom.quick = true
     dom.picked = {}
 
     return {
@@ -127,7 +128,7 @@ function Renderer(dom, onNextFrame) {
                 ${renderFoundations(game.Foundations())}
                 <div class=actions>
                     <button class=newgame>New</button>
-                    <button class=quick>${dom.quick ? "Quick" : "Pick"}</button>
+                    <button class=quick>${dom.quick ? "Auto" : "Pick"}</button>
                     <button class=undo ${game.MoveCount() === 0 ? "disabled" : ""}>Undo</button>
                 </div>
                 ${renderCells(game.Cells())}
