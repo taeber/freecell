@@ -170,7 +170,7 @@ function Renderer(dom, onNextFrame) {
             .flatMap(x => x)
             .join("\n")
 
-        dom.querySelector("button.game").onclick = () => {
+        const showGameDialog = () => {
             const dialog = dom.querySelector("dialog.game")
             dialog.showModal()
             dialog.querySelector("button.new").onclick   = () => game.NewGame()
@@ -178,10 +178,10 @@ function Renderer(dom, onNextFrame) {
             dialog.querySelector("button.close").onclick = () => dialog.close()
         }
 
-
+        dom.querySelector("button.game").onclick = showGameDialog
         if (game.Over()) {
             const winner = dom.querySelector(".winner")
-            winner.onclick = () => game.NewGame()
+            winner.onclick = showGameDialog
         }
 
         const undo = dom.querySelector("button.undo")
