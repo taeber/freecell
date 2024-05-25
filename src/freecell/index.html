@@ -48,6 +48,13 @@
         import * as freecell from "./freecell.js"
         import * as webui from "./webui.js"
 
+        if ("serviceWorker" in navigator) {
+            const filename = `${window.location.pathname}offline.js`
+            navigator.serviceWorker
+                .register(filename, { scope: "./" })
+                .catch(err => console.error("Registration failed", err))
+        }
+
         const params = window.location.search
             .slice("?".length)
             .split("&")
