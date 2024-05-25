@@ -1,4 +1,4 @@
-const cacheName = "freecell-20240525m"
+const cacheName = "freecell-20240525n"
 const files = [
   "./",
   "./android-chrome-192x192.png",
