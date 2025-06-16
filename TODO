@@ -24,7 +24,7 @@ TODO
 
 
 [x] #feature auto-complete
-[ ] #feature detect if there are no valid moves and alert user
+[x] #feature detect if there are no valid moves and alert user
 [ ] #feature highlight lowest ranking cards
 [x] #feature result sharing
     * use base-52 ?game=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ)

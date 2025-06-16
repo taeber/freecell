@@ -1,9 +1,9 @@
 const AppInfo = {
     Name: "FreeCell",
-    Version: "2024.05.25n",
+    Version: "2025.06.15a",
     Link: "https://github.com/taeber/freecell/",
     Copyright: {
-        Year: 2024,
+        Year: 2025,
         By: "Taeber Rapczak",
     },
     License: {
@@ -295,6 +295,76 @@ function easymove(data, history) {
     return false
 }
 
+
+/**
+ * Player lost when there are no moves:
+ *   cascade -> cascade
+ *   cascade -> cell
+ *   cascade -> foundation
+ *   cell -> foundation
+ *   cell -> cascade
+ */
+function lost(data, history) {
+    const { cells, foundations, cascades } = data
+    const onMoving = () => history.Snapshot(data)
+
+    // Try to move from cascade
+    for (let i = 0; i < cascades.length; i++) {
+        const src = cascades[i]
+        if (src.length === 0) {
+            continue
+        }
+        // Try to move from cascade to cascade
+        for (let j = 0; j < cascades.length; j++) {
+            if (i === j) {
+                continue
+            }
+            if (checkedMove(cascades[j], src, canPutOntoCascade, onMoving)) {
+                history.Restore(data)
+                return false
+            }
+        }
+        // Try to move from cascade to cell
+        for (let j = 0; j < cells.length; j++) {
+            if (checkedMove(cells[j], src, canPutInCell, onMoving)) {
+                history.Restore(data)
+                return false
+            }
+        }
+        // Try to move from cascade to foundation
+        for (let j = 0; j < foundations.length; j++) {
+            if (checkedMove(foundations[j], src, canPutOntoFoundation, onMoving)) {
+                history.Restore(data)
+                return false
+            }
+        }
+    }
+
+    // Try to move from cell
+    for (let i = 0; i < cells.length; i++) {
+        const src = cells[i]
+        if (src.length === 0) {
+            continue
+        }
+        // Try to move from cell to foundation
+        for (let j = 0; j < foundations.length; j++) {
+            if (checkedMove(foundations[j], src, canPutOntoFoundation, onMoving)) {
+                history.Restore(data)
+                return false
+            }
+        }
+        // Try to move from cell to cascade
+        for (let j = 0; j < cascades.length; j++) {
+            if (checkedMove(cascades[j], src, canPutOntoCascade, onMoving)) {
+                history.Restore(data)
+                return false
+            }
+        }
+    }
+
+    return true
+}
+
 /**
  * @param {() => void} onNewGame
  * @param {{game: string}} [params = {}]
@@ -321,6 +391,7 @@ function Play(renderer, onNewGame, params = {}) {
         Cascades: () => data.cascades,
         MoveCount: () => history.Length() - 1,
         Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
+        Lost: () => lost(data, history),
 
         Automove: (src) => automove(data, history, src) && game.Render(),
         Easymove: () => easymove(data, history) && game.Render(),

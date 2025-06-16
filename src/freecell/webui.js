@@ -184,11 +184,17 @@ function Renderer(dom, onNextFrame) {
             winner.onclick = showGameDialog
         }
 
+        /** @type {HTMLButtonElement} */
         const undo = dom.querySelector("button.undo")
         undo.onclick = (e) => {
             e.preventDefault()
             game.Undo()
             pick()
+        }
+        if (game.Lost()) {
+            undo.classList.add("lost")
+        } else {
+            undo.classList.remove("lost")
         }
 
         const quick = dom.querySelector("button.quick")
