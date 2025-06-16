@@ -330,9 +330,9 @@ function registerServiceWorker(location, navigator) {
     if (location.hostname === "localhost")
         return
 
-    let offlineJs = `${location.url}offline.js`
-    if (location.url.endsWith("/index.html")) {
-        offlineJs = `${location.url.replace("/index.html", "")}/offline.js`
+    let offlineJs = `${location.pathname}offline.js`
+    if (location.pathname.endsWith("/index.html")) {
+        offlineJs = `${location.href.pathname("/index.html", "")}/offline.js`
     }
 
     navigator.serviceWorker
