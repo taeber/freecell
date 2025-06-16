@@ -1,6 +1,6 @@
 const AppInfo = {
     Name: "FreeCell",
-    Version: "2025.06.15b",
+    Version: "2025.06.16a",
     Link: "https://github.com/taeber/freecell/",
     Copyright: {
         Year: 2025,

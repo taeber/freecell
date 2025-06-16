@@ -309,6 +309,10 @@ button.lost {
     color: var(--bgcolor);
 }
 
+a#net {
+    text-decoration: none;
+}
+
 @media screen and (min-width: 1024px) {
     .cascade        { margin-top:  5vmax }
     .cascade .card  { margin-top: -5vmax }

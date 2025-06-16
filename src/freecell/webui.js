@@ -89,7 +89,7 @@ function renderWinner(won, moves) {
         : ''
 }
 
-function Renderer(dom, onNextFrame) {
+function Renderer(dom, onNextFrame, window) {
     dom.quick = true
     dom.picked = {}
 
@@ -156,6 +156,12 @@ function Renderer(dom, onNextFrame) {
             <dialog class=game>
                 <button class=new>New Game</button>
                 <button class=retry>Retry</button>
+                <div id=copied hidden>Copied!</div>
+                <button id=share aria-label="Share" title="Share">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                        <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                    </svg>
+                </button>
                 <button class=close>Close</button>
             </dialog>
         `
@@ -176,6 +182,7 @@ function Renderer(dom, onNextFrame) {
             dialog.querySelector("button.new").onclick   = () => game.NewGame()
             dialog.querySelector("button.retry").onclick = () => window.location.reload()
             dialog.querySelector("button.close").onclick = () => dialog.close()
+            initShareButton(window, dom, game)
         }
 
         dom.querySelector("button.game").onclick = showGameDialog
@@ -340,17 +347,21 @@ function registerServiceWorker(location, navigator) {
         .catch(err => console.error("Registration failed", err))
 }
 
-function initShareButton(document, gamer) {
+function initShareButton(window, document, game) {
+    /** @type {HTMLButtonElement} */
     const share = document.querySelector("button#share")
-    if (!navigator.share && !navigator.clipboard) {
+    if ((!navigator.share && !navigator.clipboard) ||
+          (window.location.hostname === "localhost")) {
         share.hidden = true
+        share.disabled = true
+        return
     }
 
     share.addEventListener("click", () => {
         try {
-            const title = `FreeCell - ${gamer().ID().slice(0,6)}...`
-            const text = gamer().Over()
-                ? `I beat FreeCell in ${gamer().MoveCount()} moves! Can you do better?!`
+            const title = `FreeCell - ${game.ID().slice(0,6)}...`
+            const text = game.Over()
+                ? `I beat FreeCell in ${game.MoveCount()} moves! Can you do better?!`
                 : "I'm playing FreeCell. Think you can beat my score?"
 
             navigator.share({
@@ -378,13 +389,11 @@ function App(window, navigator) {
     console.debug({params})
 
     const element = document.querySelector("main")
-    const renderer = Renderer(element, window.requestAnimationFrame)
+    const renderer = Renderer(element, window.requestAnimationFrame, window)
 
     document.getElementById("net").onclick = () => renderer.ShowAppInfo()
 
     let game
-    initShareButton(document, () => game)
-
     freecell.Play(renderer, onNewGame, params)
 
     function onNewGame(newGame) {
