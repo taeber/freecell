@@ -1,34 +1,26 @@
-// Start listening on port 8080 of localhost.
-const server = Deno.listen({ port: 8080 });
-console.log("File server running on http://localhost:8080/");
+#!/usr/bin/env -S deno serve --allow-net --allow-read=. --port=8080 --watch
 
-for await (const conn of server) {
-  handleHttp(conn).catch(console.error);
-}
+const mimes = {
+  js: "text/javascript",
+  css: "text/css",
+  html: "text/html",
+};
 
-async function handleHttp(conn: Deno.Conn) {
-  const mimes = {
-    js: "text/javascript",
-    css: "text/css",
-    html: "text/html",
-  };
-
-  const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
+export default {
+  async fetch(request: Request) {
     // Use the request pathname as filepath
-    const url = new URL(requestEvent.request.url);
+    const url = new URL(request.url);
     const filepath = decodeURIComponent(url.pathname);
 
     if (filepath === "/") {
       const redirectResponse = new Response("301 Moved Permanently", {
         status: 301,
         headers: {
-          Location: "/index.html"
-        }
+          Location: "/index.html",
+        },
       });
-      requestEvent.respondWith(redirectResponse);
-      console.log(requestEvent.request.method, filepath, 308);
-      continue;
+      console.log(request.method, filepath, 308);
+      return redirectResponse;
     }
 
     // Try opening the file
@@ -38,9 +30,8 @@ async function handleHttp(conn: Deno.Conn) {
     } catch {
       // If the file cannot be opened, return a "404 Not Found" response
       const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      requestEvent.respondWith(notFoundResponse);
-      console.log(requestEvent.request.method, filepath, 404);
-      continue;
+      console.log(request.method, filepath, 404);
+      return notFoundResponse;
     }
 
     // Build a readable stream so the file doesn't have to be fully loaded into
@@ -50,11 +41,11 @@ async function handleHttp(conn: Deno.Conn) {
     // Build and send the response
     const response = new Response(readableStream);
 
-    const ext = filepath.split(".").slice(-1)[0];
+    const ext = filepath.split(".").slice(-1)[0] as keyof typeof mimes;
     if (mimes[ext]) {
       response.headers.set("Content-Type", mimes[ext]);
     }
-    requestEvent.respondWith(response);
-    console.log(requestEvent.request.method, filepath, 200);
-  }
-}
+    console.log(request.method, filepath, 200);
+    return response;
+  },
+} satisfies Deno.ServeDefaultExport;
