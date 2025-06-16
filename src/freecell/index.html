@@ -45,62 +45,8 @@
     </footer>
 
     <script type="module">
-        import * as freecell from "./freecell.js"
         import * as webui from "./webui.js"
-
-        if ("serviceWorker" in navigator) {
-            const filename = `${window.location.pathname}offline.js`
-            navigator.serviceWorker
-                .register(filename, { scope: "./" })
-                .catch(err => console.error("Registration failed", err))
-        }
-
-        const params = window.location.search
-            .slice("?".length)
-            .split("&")
-            .filter(s => s)
-            .map(kv => kv.split("="))
-            .reduce((params, [key, value]) => ({...params, [key]: value}), {})
-        console.debug({params})
-
-        const element = document.querySelector("main")
-        const renderer = webui.Renderer(element, window.requestAnimationFrame)
-
-        document.getElementById("net").onclick = () => renderer.ShowAppInfo()
-
-        let game
-        function onNewGame(newGame) {
-            game = newGame
-            if (params.game !== game.ID()) {
-                window.location.search = `?game=${game.ID()}`
-            }
-        }
-
-        const share = document.querySelector("button#share")
-        if (!navigator.share && !navigator.clipboard) {
-            share.hidden = true
-        }
-
-        share.addEventListener("click", () => {
-            try {
-                const title = `FreeCell - ${game.ID().slice(0,6)}...`
-                const text = game.Over()
-                    ? `I beat FreeCell in ${game.MoveCount()} moves! Can you do better?!`
-                    : "I'm playing FreeCell. Think you can beat my score?"
-
-                navigator.share({
-                    title,
-                    text,
-                    url: window.location.href,
-                })
-            } catch (e) {
-                console.debug(e)
-                navigator.clipboard.writeText(window.location.href)
-                alert("Link copied!")
-            }
-        })
-
-        freecell.Play(renderer, onNewGame, params)
+        webui.App(window, navigator)
     </script>
 </body>
 </html>

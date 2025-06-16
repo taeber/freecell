@@ -295,7 +295,11 @@ function easymove(data, history) {
     return false
 }
 
-function Play(renderer, onNewGame, params) {
+/**
+ * @param {() => void} onNewGame
+ * @param {{game: string}} [params = {}]
+ */
+function Play(renderer, onNewGame, params = {}) {
     function validGameID() {
         const requiredSize = 52
         if (!params.game) {
@@ -306,8 +310,6 @@ function Play(renderer, onNewGame, params) {
         }
         return true
     }
-
-    params = params ?? {}
 
     const deck = validGameID() ? Deck(params.game) : Deck()
     const deckID = deck.ID()

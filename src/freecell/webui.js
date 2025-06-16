@@ -309,10 +309,88 @@ function Renderer(dom, onNextFrame) {
             }
         }
     }
-
-
 }
 
+/**
+ *
+ * @param {Location} location
+ * @param {Navigator} navigator
+ * @returns
+ */
+function registerServiceWorker(location, navigator) {
+    if (!("serviceWorker" in navigator))
+        return
+
+    if (location.hostname === "localhost")
+        return
+
+    let offlineJs = `${location.url}offline.js`
+    if (location.url.endsWith("/index.html")) {
+        offlineJs = `${location.url.replace("/index.html", "")}/offline.js`
+    }
+
+    navigator.serviceWorker
+        .register(offlineJs, { scope: "./" })
+        .catch(err => console.error("Registration failed", err))
+}
+
+function initShareButton(document, gamer) {
+    const share = document.querySelector("button#share")
+    if (!navigator.share && !navigator.clipboard) {
+        share.hidden = true
+    }
+
+    share.addEventListener("click", () => {
+        try {
+            const title = `FreeCell - ${gamer().ID().slice(0,6)}...`
+            const text = gamer().Over()
+                ? `I beat FreeCell in ${gamer().MoveCount()} moves! Can you do better?!`
+                : "I'm playing FreeCell. Think you can beat my score?"
+
+            navigator.share({
+                title,
+                text,
+                url: window.location.href,
+            })
+        } catch (e) {
+            console.debug(e)
+            navigator.clipboard.writeText(window.location.href)
+            alert("Link copied!")
+        }
+    })
+}
+
+function App(window, navigator) {
+    registerServiceWorker(window.location, navigator)
+
+    const params = window.location.search
+        .slice("?".length)
+        .split("&")
+        .filter(s => s)
+        .map(kv => kv.split("="))
+        .reduce((params, [key, value]) => ({...params, [key]: value}), {})
+    console.debug({params})
+
+    const element = document.querySelector("main")
+    const renderer = Renderer(element, window.requestAnimationFrame)
+
+    document.getElementById("net").onclick = () => renderer.ShowAppInfo()
+
+    let game
+    initShareButton(document, () => game)
+
+    freecell.Play(renderer, onNewGame, params)
+
+    function onNewGame(newGame) {
+        game = newGame
+        if (params.game !== game.ID()) {
+            window.location.search = `?game=${game.ID()}`
+        }
+    }
+}
+
+
 export {
+    App,
     Renderer,
 }
