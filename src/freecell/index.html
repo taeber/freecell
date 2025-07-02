@@ -29,12 +29,12 @@
   <meta property="og:image" content="preview.png">
   <meta property="og:image:alt" content="A game of FreeCell being played">
 </head>
-<body>
+<body class=landing>
   <header>
     <h1>FreeCell</h1>
   </header>
   <main>
-    <div class=card>
+    <div class="hidden card">
       <span class=Hearts>
           <span class=suit>♥</span>
           <span class=rank>A</span>
@@ -49,15 +49,19 @@
     import * as webui from "./webui.js"
 
     if (window.location.search === "") {
-      document.body.classList.add("landing")
       const main = document.querySelector("main")
+
       main.addEventListener("click", start)
+      main.querySelector(".hidden.card").classList.remove("hidden")
+
       function start() {
         main.removeEventListener("click", start)
+
         document.body.classList.remove("landing")
         webui.App(window, navigator)
       }
     } else {
+      document.body.classList.remove("landing")
       webui.App(window, navigator)
     }
   </script>

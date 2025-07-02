@@ -65,6 +65,10 @@ body.landing {
     align-items: center;
 }
 
+
+
+.hidden { display: none }
+
 header { display: none; }
 footer {
     position: fixed;
