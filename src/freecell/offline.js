@@ -27,31 +27,35 @@ self.addEventListener("install", event => {
   )
 })
 
+// Force the waiting service worker to become the active service worker
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request, { cacheName, ignoreSearch: true })
+    // Try network first, fall back to cache
+    fetch(event.request)
       .then((response) => {
-        // caches.match() always resolves
-        // but in case of success response will have value
-        if (response !== undefined) {
-          console.debug("[offline]", "cache hit", event.request.url)
-          return response;
-        } else {
-          console.debug("[offline]", "cache miss", event.request.url)
-          return fetch(event.request)
-            .then((response) => {
-              // response may be used only once
-              // we need to save clone to put one copy in cache
-              // and serve second one
-              let responseClone = response.clone();
-
-              caches.open(cacheName)
-                .then((cache) => {
-                  cache.put(event.request, responseClone);
-                });
-              return response;
+        // If network request succeeded, update cache and return response
+        if (response.status === 200) {
+          let responseClone = response.clone()
+          caches.open(cacheName)
+            .then((cache) => {
+              cache.put(event.request, responseClone)
             })
         }
-      }),
+        return response
+      })
+      .catch(() => {
+        // Network failed, try cache
+        console.debug("[offline]", "network failed, trying cache", event.request.url)
+        return caches.match(event.request, { cacheName, ignoreSearch: true })
+          .then((response) => {
+            if (response !== undefined) {
+              console.debug("[offline]", "cache hit", event.request.url)
+              return response
+            } else {
+              console.debug("[offline]", "cache miss", event.request.url)
+              throw new Error("No cached response available")
+            }
+          })
+      })
   )
 })
