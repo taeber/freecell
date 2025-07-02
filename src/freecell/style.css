@@ -236,6 +236,7 @@ main.picked .card {
 
 .winner span {
     background: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+    background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
