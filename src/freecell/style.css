@@ -56,6 +56,15 @@ body {
     font-size: 16px;
 }
 
+body.landing {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 header { display: none; }
 footer {
     position: fixed;

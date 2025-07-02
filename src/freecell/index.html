@@ -1,46 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeCell</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreeCell</title>
 
-    <!--
-        These favicons were generated using the following graphics from Twitter Twemoji:
+  <!--
+    These favicons were generated using the following graphics from Twitter Twemoji:
 
-        - Graphics Title: 1f5a4.svg
-        - Graphics Author: Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
-        - Graphics Source: https://github.com/twitter/twemoji/blob/master/assets/svg/1f5a4.svg
-        - Graphics License: CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
-    -->
-    <link rel="icon" href="favicon.ico" sizes="any">
-    <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
-    <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    - Graphics Title: 1f5a4.svg
+    - Graphics Author: Copyright 2020 Twitter, Inc and other contributors (https://github.com/twitter/twemoji)
+    - Graphics Source: https://github.com/twitter/twemoji/blob/master/assets/svg/1f5a4.svg
+    - Graphics License: CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+  -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-    <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="normalize.css">
 
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 
-    <link rel="manifest" href="site.webmanifest">
-    <meta name="theme-color" content="#fafafa">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#fafafa">
 
-    <meta property="og:title" content="FreeCell">
-    <meta property="og:image" content="preview.png">
-    <meta property="og:image:alt" content="A game of FreeCell being played">
+  <meta property="og:title" content="FreeCell">
+  <meta property="og:image" content="preview.png">
+  <meta property="og:image:alt" content="A game of FreeCell being played">
 </head>
 <body>
-    <header>
-        <h1>FreeCell</h1>
-    </header>
-    <main></main>
-    <footer>
-       <a href="#" id=net>&pi;</a>
-    </footer>
+  <header>
+    <h1>FreeCell</h1>
+  </header>
+  <main>
+    <div class=card>
+      <span class=Hearts>
+          <span class=suit>♥</span>
+          <span class=rank>A</span>
+      </span>
+    </div>
+  </main>
+  <footer>
+     <a href="#" id=net>&pi;</a>
+  </footer>
 
-    <script type="module">
-        import * as webui from "./webui.js"
+  <script type="module">
+    import * as webui from "./webui.js"
+
+    if (window.location.search === "") {
+      document.body.classList.add("landing")
+      const main = document.querySelector("main")
+      main.addEventListener("click", start)
+      function start() {
+        main.removeEventListener("click", start)
+        document.body.classList.remove("landing")
         webui.App(window, navigator)
-    </script>
+      }
+    } else {
+      webui.App(window, navigator)
+    }
+  </script>
 </body>
 </html>
