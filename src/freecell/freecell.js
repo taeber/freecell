@@ -1,6 +1,6 @@
 const AppInfo = {
     Name: "FreeCell",
-    Version: "2025.07.02c",
+    Version: "2025.07.02d",
     Link: "https://github.com/taeber/freecell/",
     Copyright: {
         Year: 2025,
@@ -381,6 +381,9 @@ function Play(renderer, onNewGame, params = {}) {
         return true
     }
 
+    const started = Date.now()
+    let ended = null
+
     const deck = validGameID() ? Deck(params.game) : Deck()
     const deckID = deck.ID()
     const history = makeHistory()
@@ -389,8 +392,13 @@ function Play(renderer, onNewGame, params = {}) {
         Cells: () => data.cells,
         Foundations: () => data.foundations,
         Cascades: () => data.cascades,
-        MoveCount: () => history.Length() - 1,
-        Over: () => [...data.cascades, ...data.cells].every(c => c.length === 0),
+        Over: () => {
+            const isOver = [...data.cascades, ...data.cells].every(c => c.length === 0)
+            if (isOver && ended === null) {
+                ended = Date.now()
+            }
+            return isOver
+        },
         Lost: () => lost(data, history),
 
         Automove: (src) => automove(data, history, src) && game.Render(),
@@ -400,7 +408,11 @@ function Play(renderer, onNewGame, params = {}) {
         Render: () => renderer.Render(game),
         Undo: () => history.Restore(data) && game.Render(),
 
-        ID: () => deckID
+        ID: () => deckID,
+
+        MoveCount: () => history.Length() - 1,
+        StartedAt: () => started,
+        EndedAt: () => ended,
     }
     history.Snapshot(data)
     game.Render()

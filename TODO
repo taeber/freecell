@@ -43,7 +43,7 @@ TODO
 [ ] #ux make foundations targets
 [x] #ux add transparent A's on Foundations
 [ ] #ux actions/options bar at the bottom (easy to tap than up top)
-[ ] #feature timed games
+[x] #feature timed games
 [ ] #feature show move count and time
 [ ] #feature don't increment move count if moving the same card twice
 [ ] #ux rules/tutorial

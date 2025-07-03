@@ -101,6 +101,24 @@ main {
     flex-direction: column;
 }
 
+.stats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2em;
+    margin: 0.5em 0;
+    font-size: 0.9em;
+    color: var(--fgcolor);
+}
+
+.stats .movecount,
+.stats .elapsed {
+    padding: 0.25em 0.5em;
+    background-color: var(--bgcolor2);
+    border-radius: 0.25em;
+    font-family: "IBM Plex Mono", monospace;
+}
+
 .top {
     display: flex;
     flex-direction: row;

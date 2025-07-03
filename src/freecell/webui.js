@@ -83,10 +83,24 @@ function renderCascades(cascades) {
     }
 }
 
-function renderWinner(won, moves) {
-    return won
-        ? `<div class=winner><span>You won in ${moves} moves!</span></div>`
-        : ''
+
+function formatTime(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+function renderWinner(won, moves, started, ended) {
+    if (!won) {
+        return ""
+    }
+
+    return `
+        <div class=winner>
+            <span>You won in ${moves} moves and ${formatTime(ended - started)} time!</span>
+        </div>
+    `
 }
 
 function Renderer(dom, onNextFrame, window) {
@@ -123,6 +137,14 @@ function Renderer(dom, onNextFrame, window) {
     function hasPick() { return !!dom.picked.cell || !!dom.picked.cascade }
 
     function renderGame(game) {
+        const now = game.EndedAt() || Date.now()
+        const stats = `
+            <div class=stats>
+                <span class=movecount>${game.MoveCount()} moves</span>
+                <span class=elapsed>${formatTime(now - game.StartedAt())}</span>
+            </div>
+        `
+
         const topRow = `
             <div class=top>
                 ${renderFoundations(game.Foundations())}
@@ -167,9 +189,10 @@ function Renderer(dom, onNextFrame, window) {
         `
 
         dom.innerHTML = [
+            stats,
             topRow,
             renderCascades(game.Cascades()),
-            renderWinner(game.Over(), game.MoveCount()),
+            renderWinner(game.Over(), game.MoveCount(), game.StartedAt(), game.EndedAt()),
             appinfoDialog,
             gameDialog,
         ]
@@ -377,6 +400,10 @@ function initShareButton(window, document, game) {
     })
 }
 
+/**
+ * @param {Window} window
+ * @param {Navigator} navigator
+ */
 function App(window, navigator) {
     registerServiceWorker(window.location, navigator)
 
@@ -395,6 +422,11 @@ function App(window, navigator) {
 
     let game
     freecell.Play(renderer, onNewGame, params)
+
+    setInterval(() => {
+        const now = game.EndedAt() || Date.now()
+        window.document.querySelector(".elapsed").textContent = formatTime(now - game.StartedAt())
+    }, 1000)
 
     function onNewGame(newGame) {
         game = newGame
