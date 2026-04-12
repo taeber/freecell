@@ -15,74 +15,40 @@ const files = [
   "./webui.js",
 ]
 
-self.addEventListener("install", event => {
-  console.debug("[offline]", "install", cacheName, files)
-
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(cacheName)
-      .then(cache => {
-        console.debug("[offline]", "cache open")
-        return cache.addAll(files)
-      })
+    caches.open(cacheName).then((cache) => cache.addAll(files))
+      .then(() => self.skipWaiting()),
   )
 })
 
-// Force the waiting service worker to become the active service worker
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    // Try network with 1-second timeout, fall back to cache
-    (() => {
-      // Keep reference to original fetch to avoid duplicate requests
-      const originalFetch = fetch(event.request)
-      
-      return Promise.race([
-        originalFetch,
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Fetch timeout")), 1000)
-        )
-      ])
-        .then((response) => {
-          // If network request succeeded within 1s, update cache and return response
-          if (response.status === 200) {
-            let responseClone = response.clone()
-            caches.open(cacheName)
-              .then((cache) => {
-                cache.put(event.request, responseClone)
-              })
-          }
-          return response
-        })
-        .catch(() => {
-          // Network failed or timed out, try cache
-          console.debug("[offline]", "network failed/timeout, trying cache", event.request.url)
-          
-          // Use the original fetch promise for background cache update to avoid duplicate requests
-          originalFetch
-            .then((response) => {
-              if (response.status === 200) {
-                let responseClone = response.clone()
-                caches.open(cacheName)
-                  .then((cache) => {
-                    console.debug("[offline]", "background cache update", event.request.url)
-                    cache.put(event.request, responseClone)
-                  })
-              }
-            })
-            .catch(() => {
-              console.debug("[offline]", "background fetch also failed", event.request.url)
-            })
-          
-          return caches.match(event.request, { cacheName, ignoreSearch: true })
-            .then((response) => {
-              if (response !== undefined) {
-                console.debug("[offline]", "cache hit", event.request.url)
-                return response
-              } else {
-                console.debug("[offline]", "cache miss", event.request.url)
-                throw new Error("No cached response available")
-              }
-            })
-        })
-    })()
-  )
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim())
 })
+
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url)
+  if (url.origin !== self.location.origin || event.request.method !== "GET") {
+    return // pass through unintercepted
+  }
+
+  event.respondWith(staleWhileRevalidate(event.request))
+})
+
+function staleWhileRevalidate(request) {
+  const network = fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        caches.open(cacheName).then((cache) =>
+          cache.put(request, response.clone())
+        )
+      }
+      return response
+    })
+
+  const lookup = new Promise((resolve) => setTimeout(resolve, 10))
+    .then(() => caches.match(request, { ignoreSearch: true }))
+    .then((cached) => cached || network)
+
+  return Promise.any([network, lookup])
+}
