@@ -179,6 +179,9 @@ function Renderer(dom, onNextFrame, window) {
                 <p>
                     <a href="${freecell.AppInfo.Link}">${freecell.AppInfo.Link}</a>
                 </p>
+                <p class=game-id>
+                  Game ID: ${game.ID()}
+                </p>
                 <button>Close</button>
             </dialog>
         `
@@ -415,22 +418,29 @@ function initShareButton(window, document, game) {
  * @param {HTMLMainElement?} main
  */
 function App(window, navigator, main = null) {
+    const storageKey = "/freecell/game"
+
     registerServiceWorker(window.location, navigator)
 
-    // TODO: clean this up - copied from old index.html code
-    if (main && window.location.search === "") {
-        const main = document.querySelector("main")
-
-        main.addEventListener("click", start, { once: true })
-        main.querySelector(".hidden.card").classList.remove("hidden")
-        return
-
-        function start() {
+    if (main) {
+        if (window.location.search !== "") {
+            main.querySelector(".hidden.card").classList.add("hidden")
+            document.body.classList.remove("landing")
             App(window, navigator)
+            return
         }
-    } else if (main) {
-        document.body.classList.remove("landing")
-        App(window, navigator)
+
+        main.addEventListener("click", function start() {
+            const prevGameID = localStorage.getItem(storageKey)
+            if (prevGameID) {
+                window.location.search = `?game=${prevGameID}`
+                return
+            }
+
+            App(window, navigator)
+        }, { once: true })
+        main.querySelector(".hidden.card").classList.remove("hidden")
+
         return
     }
 
@@ -458,6 +468,7 @@ function App(window, navigator, main = null) {
     function onNewGame(newGame) {
         game = newGame
         if (params.game !== game.ID()) {
+            localStorage.setItem(storageKey, game.ID())
             window.location.search = `?game=${game.ID()}`
         }
     }

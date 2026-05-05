@@ -278,6 +278,10 @@ dialog.game button.close {
     margin-top: 2em;
 }
 
+.game-id {
+    word-wrap: break-word;
+}
+
 
 /* CSS */
 button {
