@@ -39,8 +39,9 @@ function staleWhileRevalidate(request) {
   const network = fetch(request)
     .then((response) => {
       if (response.ok) {
+        const copy = response.clone()
         caches.open(cacheName).then((cache) =>
-          cache.put(request, response.clone())
+          cache.put(request, copy)
         )
       }
       return response
