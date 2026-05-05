@@ -160,8 +160,17 @@ function Renderer(dom, onNextFrame, window) {
         const appinfoDialog = `
             <dialog class=appinfo>
                 <strong>${freecell.AppInfo.Name}</strong>
-                <p id="version">Version: ${freecell.AppInfo.Version}</p>
-                <p>&copy; ${freecell.AppInfo.Copyright.Year} ${freecell.AppInfo.Copyright.By}</p>
+                <p id="version">
+                  Version: ${freecell.AppInfo.Version}
+                </p>
+                <p>
+                  <a href="javascript:window.location.reload()">Reload site</a>
+                </p>
+                <p>
+                    &copy;
+                    ${freecell.AppInfo.Copyright.FirstYear}&ndash;${freecell.AppInfo.Copyright.Year}
+                    ${freecell.AppInfo.Copyright.By}
+                    </p>
                 <p>
                     <a href="${freecell.AppInfo.License.Link}">
                         ${freecell.AppInfo.License.Name}

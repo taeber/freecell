@@ -1,9 +1,10 @@
 const AppInfo = {
     Name: "FreeCell",
-    Version: "2026.04.12a",
+    Version: "2026.05.04a",
     Link: "https://github.com/taeber/freecell/",
     Copyright: {
-        Year: 2025,
+        FirstYear: 2023,
+        Year: 2026,
         By: "Taeber Rapczak",
     },
     License: {
