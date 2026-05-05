@@ -412,9 +412,27 @@ function initShareButton(window, document, game) {
 /**
  * @param {Window} window
  * @param {Navigator} navigator
+ * @param {HTMLMainElement?} main
  */
-function App(window, navigator) {
+function App(window, navigator, main = null) {
     registerServiceWorker(window.location, navigator)
+
+    // TODO: clean this up - copied from old index.html code
+    if (main && window.location.search === "") {
+        const main = document.querySelector("main")
+
+        main.addEventListener("click", start, { once: true })
+        main.querySelector(".hidden.card").classList.remove("hidden")
+        return
+
+        function start() {
+            App(window, navigator)
+        }
+    } else if (main) {
+        document.body.classList.remove("landing")
+        App(window, navigator)
+        return
+    }
 
     const params = window.location.search
         .slice("?".length)

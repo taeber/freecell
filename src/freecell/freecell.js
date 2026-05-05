@@ -416,8 +416,10 @@ function Play(renderer, onNewGame, params = {}) {
         EndedAt: () => ended,
     }
     history.Snapshot(data)
-    game.Render()
-    setTimeout(() => onNewGame(game), 1)
+    setTimeout(() => {
+        onNewGame(game)
+        game.Render()
+    }, 1)
     return game
 }
 

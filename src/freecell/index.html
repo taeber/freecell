@@ -48,22 +48,7 @@
   <script type="module">
     import * as webui from "./webui.js"
 
-    if (window.location.search === "") {
-      const main = document.querySelector("main")
-
-      main.addEventListener("click", start)
-      main.querySelector(".hidden.card").classList.remove("hidden")
-
-      function start() {
-        main.removeEventListener("click", start)
-
-        document.body.classList.remove("landing")
-        webui.App(window, navigator)
-      }
-    } else {
-      document.body.classList.remove("landing")
-      webui.App(window, navigator)
-    }
+    webui.App(window, navigator, document.querySelector("main"))
   </script>
 </body>
 </html>
