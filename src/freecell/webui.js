@@ -179,12 +179,12 @@ function Renderer(dom, onNextFrame, window) {
                 <p>
                     <a href="${freecell.AppInfo.Link}">${freecell.AppInfo.Link}</a>
                 </p>
-                <p class=game-id>
-                  Game ID: ${game.ID()}
-                </p>
                 <button>Close</button>
             </dialog>
         `
+
+        const gameIdParagraph =
+            `<p>Game ID: <code class=game-id>${game.ID()}</code>.</p>`
 
         const gameDialog = `
             <dialog class=game>
@@ -196,6 +196,7 @@ function Renderer(dom, onNextFrame, window) {
                         <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
                     </svg>
                 </button>
+                ${!game.Over() ? gameIdParagraph : ""}
                 <button class=close>Close</button>
             </dialog>
         `
@@ -224,6 +225,7 @@ function Renderer(dom, onNextFrame, window) {
         if (game.Over()) {
             const winner = dom.querySelector(".winner")
             winner.onclick = showGameDialog
+            Storage().GameID = null
         }
 
         /** @type {HTMLButtonElement} */
@@ -418,8 +420,6 @@ function initShareButton(window, document, game) {
  * @param {HTMLMainElement?} main
  */
 function App(window, navigator, main = null) {
-    const storageKey = "/freecell/game"
-
     registerServiceWorker(window.location, navigator)
 
     if (main) {
@@ -431,7 +431,7 @@ function App(window, navigator, main = null) {
         }
 
         main.addEventListener("click", function start() {
-            const prevGameID = localStorage.getItem(storageKey)
+            const prevGameID = Storage().GameID
             if (prevGameID) {
                 window.location.search = `?game=${prevGameID}`
                 return
@@ -468,9 +468,26 @@ function App(window, navigator, main = null) {
     function onNewGame(newGame) {
         game = newGame
         if (params.game !== game.ID()) {
-            localStorage.setItem(storageKey, game.ID())
+            Storage().GameID = game.ID()
             window.location.search = `?game=${game.ID()}`
         }
+    }
+}
+
+function Storage() {
+    const storageKey = "/freecell/game"
+
+    return {
+        get GameID() {
+            return localStorage.getItem(storageKey)
+        },
+        set GameID(value) {
+            if (value !== null) {
+                localStorage.setItem(storageKey, value)
+            } else {
+                localStorage.removeItem(storageKey)
+            }
+        },
     }
 }
 

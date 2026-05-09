@@ -280,6 +280,7 @@ dialog.game button.close {
 
 .game-id {
     word-wrap: break-word;
+    font-family: monospace;
 }
 
 
